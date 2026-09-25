@@ -12,6 +12,7 @@ from interface.depenses import afficher_page_depenses
 from interface.clients import afficher_page_clients
 from interface.rapports import afficher_page_rapports
 from interface.assistant_ia import afficher_page_assistant_ia
+from interface.previsions import afficher_page_previsions
 
 # ==========================================
 # CONFIGURATION
@@ -132,7 +133,8 @@ with st.sidebar:
             "💳 Dépenses",
             "👥 Clients",
             "📈 Rapports",
-            "🤖 Assistant IA"
+            "🤖 Assistant IA",
+            "Presvisions IA"
         ]
     )
     st.divider()
@@ -165,6 +167,8 @@ elif menu == "📈 Rapports":
     afficher_page_rapports()
 elif menu == "🤖 Assistant IA":
     afficher_page_assistant_ia()
+elif menu == "Previsions IA":
+    afficher_page_previsions()
 
 # ==========================================
 # FOOTER (affiché sur toutes les pages, hors connexion)

@@ -1,5 +1,5 @@
-
 import streamlit as st
+from streamlit_option_menu import option_menu
 from database.models import creer_tables
 from interface.connexion import afficher_page_connexion
 from interface.inscription import afficher_page_inscription
@@ -21,7 +21,7 @@ st.set_page_config(
     page_title="ComorIA Business",
     page_icon="🇰🇲",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ==========================================
@@ -111,35 +111,17 @@ st.markdown(
 )
 
 # ==========================================
-# SIDEBAR
+# BARRE DU HAUT : infos utilisateur + déconnexion
 # ==========================================
-with st.sidebar:
-    st.markdown("## ComorIA")
-    st.markdown("### Business AI")
-    st.divider()
-
-    st.write(f"👤 **{st.session_state.nom_utilisateur}**")
-    st.caption(st.session_state.email_utilisateur)
-    st.caption(f"Rôle : {st.session_state.role}")
-    st.divider()
-
-    menu = st.radio(
-        "Menu",
-        [
-            "🏠 Accueil",
-            "📦 Produits",
-            "📊 Stock",
-            "💰 Ventes",
-            "💳 Dépenses",
-            "👥 Clients",
-            "📈 Rapports",
-            "🤖 Assistant IA",
-            "Presvisions IA"
-        ]
+col_info, col_bouton = st.columns([5, 1])
+with col_info:
+    st.caption(
+        f"👤 **{st.session_state.nom_utilisateur}** · "
+        f"{st.session_state.email_utilisateur} · "
+        f"Rôle : {st.session_state.role}"
     )
-    st.divider()
-
-    if st.button("🚪 Se déconnecter", use_container_width=True):
+with col_bouton:
+    if st.button("🚪 Déconnexion", use_container_width=True):
         st.session_state.connecte = False
         st.session_state.utilisateur_id = None
         st.session_state.nom_utilisateur = None
@@ -149,25 +131,68 @@ with st.sidebar:
         st.rerun()
 
 # ==========================================
+# MENU HORIZONTAL
+# ==========================================
+menu = option_menu(
+    menu_title=None,
+    options=[
+        "Accueil",
+        "Produits",
+        "Stock",
+        "Ventes",
+        "Dépenses",
+        "Clients",
+        "Rapports",
+        "Assistant IA",
+        "Prévisions IA",
+    ],
+    icons=[
+        "house",
+        "box-seam",
+        "bar-chart",
+        "cash-coin",
+        "credit-card",
+        "people",
+        "graph-up",
+        "robot",
+        "graph-up-arrow",
+    ],
+    menu_icon="cast",
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "#FFFFFF"},
+        "icon": {"font-size": "16px"},
+        "nav-link": {
+            "font-size": "13px",
+            "text-align": "center",
+            "margin": "0px",
+            "padding": "10px 8px",
+        },
+        "nav-link-selected": {"background-color": "#00843D"},
+    },
+)
+
+# ==========================================
 # ROUTAGE DES PAGES
 # ==========================================
-if menu == "🏠 Accueil":
+if menu == "Accueil":
     afficher_page_accueil()
-elif menu == "📦 Produits":
+elif menu == "Produits":
     afficher_page_produits()
-elif menu == "📊 Stock":
+elif menu == "Stock":
     afficher_page_stock()
-elif menu == "💰 Ventes":
+elif menu == "Ventes":
     afficher_page_ventes()
-elif menu == "💳 Dépenses":
+elif menu == "Dépenses":
     afficher_page_depenses()
-elif menu == "👥 Clients":
+elif menu == "Clients":
     afficher_page_clients()
-elif menu == "📈 Rapports":
+elif menu == "Rapports":
     afficher_page_rapports()
-elif menu == "🤖 Assistant IA":
+elif menu == "Assistant IA":
     afficher_page_assistant_ia()
-elif menu == "Previsions IA":
+elif menu == "Prévisions IA":
     afficher_page_previsions()
 
 # ==========================================

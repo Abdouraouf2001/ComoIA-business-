@@ -1,4 +1,7 @@
 streamlit
+streamlit-option-menu
+altair
 pandas
 fpdf2
 openpyxl
+requests

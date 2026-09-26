@@ -1,8 +1,7 @@
-
 import textwrap
 
 import streamlit as st
-from services.authentification import verifier_connexion
+from fonctions.utilisateurs import verifier_connexion
 
 
 def afficher_page_connexion():
@@ -142,11 +141,13 @@ def afficher_page_connexion():
                 use_container_width=True,
                 type="primary"
             )
+
             if connecter:
                 if not email.strip() or not mot_de_passe:
                     st.warning("Veuillez remplir tous les champs.")
                 else:
                     utilisateur = verifier_connexion(email, mot_de_passe)
+
                     if utilisateur:
                         st.session_state.connecte = True
                         st.session_state.utilisateur_id = utilisateur["id"]
@@ -183,7 +184,7 @@ def afficher_page_connexion():
 
         st.markdown(
             '<div class="login-footer">'
-            ' ComorIA Business AI • © 2026 • Tous droits réservés'
+            'ComorIA Business AI • © 2026 • Tous droits réservés'
             '</div>',
             unsafe_allow_html=True
         )

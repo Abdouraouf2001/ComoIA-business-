@@ -4,7 +4,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from database.connexion import obtenir_connexion
-from services.previsions import (
+from ml.prediction import (
     analyser_historique,
     obtenir_historique_produit,
     obtenir_ventes_quotidiennes,

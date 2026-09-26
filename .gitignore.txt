@@ -1,0 +1,26 @@
+# Base de donnÃ©es locale â€” ne doit jamais Ãªtre versionnÃ©e
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Environnement Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Secrets / variables d'environnement
+.env
+.streamlit/secrets.toml
+
+# Fichiers gÃ©nÃ©rÃ©s par les exports (Excel/PDF tÃ©lÃ©chargÃ©s en local)
+*.xlsx
+*.pdf
+!documents/**/*.pdf
+
+# Ã‰diteur / systÃ¨me
+.vscode/
+.DS_Store
+Thumbs.db

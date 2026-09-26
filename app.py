@@ -117,8 +117,8 @@ st.markdown(
 col_info, col_bouton = st.columns([5, 1])
 with col_info:
     st.caption(
-        f"👤 **{st.session_state.nom_utilisateur}** • "
-        f"{st.session_state.email_utilisateur} • "
+        f"👤 **{st.session_state.nom_utilisateur}** · "
+        f"{st.session_state.email_utilisateur} · "
         f"Rôle : {st.session_state.role}"
     )
 with col_bouton:

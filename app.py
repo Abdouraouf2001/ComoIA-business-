@@ -13,7 +13,7 @@ from interface.clients import afficher_page_clients
 from interface.rapports import afficher_page_rapports
 from interface.assistant_ia import afficher_page_assistant_ia
 from interface.previsions import afficher_page_previsions
-#from fonctions.google_oauth import obtenir_url_connexion_google
+from interface.administrateur import afficher_page_administrateur
 
 # ==========================================
 # CONFIGURATION
@@ -60,44 +60,12 @@ if not st.session_state.connecte:
 
 # ==========================================
 # STYLE APPLICATION
-# (utilisé par accueil.py : .hero, .card — et par le footer ci-dessous)
 # ==========================================
 st.markdown(
     """
 <style>
 .stApp {
     background-color: #F5F7F7;
-}
-.hero {
-    background: linear-gradient(135deg, #00843D, #006B32);
-    padding: 45px 30px;
-    border-radius: 20px;
-    text-align: center;
-    margin-bottom: 30px;
-}
-.hero h1 {
-    color: white;
-    font-size: 42px;
-    margin-bottom: 10px;
-}
-.hero p {
-    color: white;
-    font-size: 20px;
-    margin: 0;
-}
-.card {
-    background-color: white;
-    padding: 25px;
-    border-radius: 15px;
-    border: 1px solid #E5E7EB;
-    text-align: center;
-    height: 100%;
-}
-.card h3 {
-    color: #00843D;
-}
-.card p {
-    color: #333333;
 }
 .footer {
     text-align: center;
@@ -117,8 +85,8 @@ st.markdown(
 col_info, col_bouton = st.columns([5, 1])
 with col_info:
     st.caption(
-        f"👤 **{st.session_state.nom_utilisateur}** · "
-        f"{st.session_state.email_utilisateur} · "
+        f"👤 **{st.session_state.nom_utilisateur}** • "
+        f"{st.session_state.email_utilisateur} • "
         f"Rôle : {st.session_state.role}"
     )
 with col_bouton:
@@ -132,32 +100,39 @@ with col_bouton:
         st.rerun()
 
 # ==========================================
-# MENU HORIZONTAL
+# MENU HORIZONTAL (Administration visible aux admins uniquement)
 # ==========================================
+options_menu = [
+    "Accueil",
+    "Produits",
+    "Stock",
+    "Ventes",
+    "Dépenses",
+    "Clients",
+    "Rapports",
+    "Assistant IA",
+    "Prévisions IA",
+]
+icones_menu = [
+    "house",
+    "box-seam",
+    "bar-chart",
+    "cash-coin",
+    "credit-card",
+    "people",
+    "graph-up",
+    "robot",
+    "graph-up-arrow",
+]
+
+if st.session_state.role == "administrateur":
+    options_menu.append("Administration")
+    icones_menu.append("shield-lock")
+
 menu = option_menu(
     menu_title=None,
-    options=[
-        "Accueil",
-        "Produits",
-        "Stock",
-        "Ventes",
-        "Dépenses",
-        "Clients",
-        "Rapports",
-        "Assistant IA",
-        "Prévisions IA",
-    ],
-    icons=[
-        "house",
-        "box-seam",
-        "bar-chart",
-        "cash-coin",
-        "credit-card",
-        "people",
-        "graph-up",
-        "robot",
-        "graph-up-arrow",
-    ],
+    options=options_menu,
+    icons=icones_menu,
     menu_icon="cast",
     default_index=0,
     orientation="horizontal",
@@ -195,20 +170,17 @@ elif menu == "Assistant IA":
     afficher_page_assistant_ia()
 elif menu == "Prévisions IA":
     afficher_page_previsions()
+elif menu == "Administration":
+    afficher_page_administrateur()
 
 # ==========================================
 # FOOTER (affiché sur toutes les pages, hors connexion)
 # ==========================================
 st.markdown(
     '<div class="footer">'
-     '<strong>ComorIA Business AI</strong><br>'
+    '<strong>ComorIA Business AI</strong><br>'
     "L'intelligence artificielle au service des entreprises comoriennes<br><br>"
     '© 2026 ComorIA • Tous droits réservés'
     '</div>',
     unsafe_allow_html=True
 )
-
-
-
-
-

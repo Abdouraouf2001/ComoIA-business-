@@ -175,8 +175,8 @@ def afficher_page_produits():
                         """
                         INSERT INTO produits
                         (nom, categorie, prix_achat, prix_vente,
-                         quantite, seuil_alerte)
-                        VALUES (?, ?, ?, ?, ?, ?)
+                         quantite, seuil_alerte, utilisateur_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             nom.strip(),
@@ -184,7 +184,8 @@ def afficher_page_produits():
                             prix_achat,
                             prix_vente,
                             quantite,
-                            seuil_alerte
+                            seuil_alerte,
+                            st.session_state.utilisateur_id
                         )
                     )
                     connexion.commit()
@@ -210,8 +211,10 @@ def afficher_page_produits():
                 quantite,
                 seuil_alerte
             FROM produits
+            WHERE utilisateur_id = ?
             ORDER BY id DESC
-            """
+            """,
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not produits:
@@ -290,8 +293,8 @@ def afficher_page_produits():
                 try:
                     with closing(obtenir_connexion()) as connexion:
                         connexion.execute(
-                            "DELETE FROM produits WHERE id = ?",
-                            (produit["id"],)
+                            "DELETE FROM produits WHERE id = ? AND utilisateur_id = ?",
+                            (produit["id"], st.session_state.utilisateur_id)
                         )
                         connexion.commit()
 

@@ -4,11 +4,11 @@ from contextlib import closing
 from database.connexion import obtenir_connexion
 
 
-def obtenir_ventes_quotidiennes():
+def obtenir_ventes_quotidiennes(utilisateur_id):
     """
-    Récupère le chiffre d'affaires par jour calendaire, du premier
-    jour de vente à aujourd'hui, en complétant à 0 les jours sans
-    aucune vente (indispensable pour une moyenne mobile fiable).
+    Récupère le chiffre d'affaires par jour calendaire d'un utilisateur,
+    du premier jour de vente à aujourd'hui, en complétant à 0 les jours
+    sans aucune vente (indispensable pour une moyenne mobile fiable).
     """
 
     with closing(obtenir_connexion()) as connexion:
@@ -16,9 +16,11 @@ def obtenir_ventes_quotidiennes():
             """
             SELECT DATE(date_vente) AS jour, SUM(montant_total) AS chiffre_affaires
             FROM ventes
+            WHERE utilisateur_id = ?
             GROUP BY DATE(date_vente)
             ORDER BY jour ASC
-            """
+            """,
+            (utilisateur_id,)
         ).fetchall()
 
     if not lignes:
@@ -42,10 +44,10 @@ def obtenir_ventes_quotidiennes():
     return serie_complete
 
 
-def obtenir_historique_produit(produit_id):
+def obtenir_historique_produit(utilisateur_id, produit_id):
     """
-    Récupère les ventes quotidiennes d'un produit, jours sans
-    vente inclus à 0 (même logique que ci-dessus).
+    Récupère les ventes quotidiennes d'un produit pour un utilisateur,
+    jours sans vente inclus à 0 (même logique que ci-dessus).
     """
 
     with closing(obtenir_connexion()) as connexion:
@@ -53,11 +55,11 @@ def obtenir_historique_produit(produit_id):
             """
             SELECT DATE(date_vente) AS jour, SUM(quantite) AS quantite
             FROM ventes
-            WHERE produit_id = ?
+            WHERE produit_id = ? AND utilisateur_id = ?
             GROUP BY DATE(date_vente)
             ORDER BY jour ASC
             """,
-            (produit_id,)
+            (produit_id, utilisateur_id)
         ).fetchall()
 
     if not lignes:
@@ -81,14 +83,14 @@ def obtenir_historique_produit(produit_id):
     return serie_complete
 
 
-def analyser_historique():
+def analyser_historique(utilisateur_id):
     """
     Analyse la quantité de données disponible (en jours calendaires,
     pas seulement en jours avec vente) pour déterminer si une
-    prévision est possible.
+    prévision est possible, pour un utilisateur donné.
     """
 
-    ventes = obtenir_ventes_quotidiennes()
+    ventes = obtenir_ventes_quotidiennes(utilisateur_id)
     nombre_jours = len(ventes)
 
     if nombre_jours == 0:
@@ -111,17 +113,17 @@ def analyser_historique():
     }
 
 
-def prevoir_chiffre_affaires_moyenne_mobile(nombre_jours=7):
+def prevoir_chiffre_affaires_moyenne_mobile(utilisateur_id, nombre_jours=7):
     """
     Prévision simple basée sur la moyenne des derniers jours
-    calendaires (jours sans vente comptés comme 0).
+    calendaires d'un utilisateur (jours sans vente comptés comme 0).
     Sert de référence avant un modèle ML plus avancé.
     """
 
     if nombre_jours <= 0:
         return None
 
-    ventes = obtenir_ventes_quotidiennes()
+    ventes = obtenir_ventes_quotidiennes(utilisateur_id)
 
     if len(ventes) < nombre_jours:
         return None

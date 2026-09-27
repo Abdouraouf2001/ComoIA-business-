@@ -41,7 +41,9 @@ def afficher_page_ventes():
 
     with closing(obtenir_connexion()) as connexion:
         produits = connexion.execute(
-            "SELECT id, nom, prix_vente, quantite FROM produits ORDER BY nom ASC"
+            "SELECT id, nom, prix_vente, quantite FROM produits "
+            "WHERE utilisateur_id = ? ORDER BY nom ASC",
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not produits:
@@ -101,18 +103,21 @@ def afficher_page_ventes():
                             connexion.execute(
                                 """
                                 INSERT INTO ventes
-                                (produit_id, quantite, prix_unitaire, montant_total)
-                                VALUES (?, ?, ?, ?)
+                                (produit_id, quantite, prix_unitaire,
+                                 montant_total, utilisateur_id)
+                                VALUES (?, ?, ?, ?, ?)
                                 """,
                                 (
                                     produit["id"], quantite,
-                                    produit["prix_vente"], montant_total
+                                    produit["prix_vente"], montant_total,
+                                    st.session_state.utilisateur_id
                                 )
                             )
                             connexion.execute(
                                 "UPDATE produits SET quantite = quantite - ? "
-                                "WHERE id = ?",
-                                (quantite, produit["id"])
+                                "WHERE id = ? AND utilisateur_id = ?",
+                                (quantite, produit["id"],
+                                 st.session_state.utilisateur_id)
                             )
                             connexion.commit()
 
@@ -137,8 +142,10 @@ def afficher_page_ventes():
                 ventes.prix_unitaire, ventes.montant_total, ventes.date_vente
             FROM ventes
             LEFT JOIN produits ON ventes.produit_id = produits.id
+            WHERE ventes.utilisateur_id = ?
             ORDER BY ventes.date_vente DESC
-            """
+            """,
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not ventes:

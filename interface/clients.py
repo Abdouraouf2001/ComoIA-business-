@@ -1,4 +1,3 @@
-
 from contextlib import closing
 
 import streamlit as st
@@ -79,14 +78,16 @@ def afficher_page_clients():
                 with closing(obtenir_connexion()) as connexion:
                     connexion.execute(
                         """
-                        INSERT INTO clients (nom, telephone, email, adresse)
-                        VALUES (?, ?, ?, ?)
+                        INSERT INTO clients
+                        (nom, telephone, email, adresse, utilisateur_id)
+                        VALUES (?, ?, ?, ?, ?)
                         """,
                         (
                             nom.strip(),
                             telephone.strip(),
                             email.strip(),
-                            adresse.strip()
+                            adresse.strip(),
+                            st.session_state.utilisateur_id
                         )
                     )
                     connexion.commit()
@@ -103,8 +104,10 @@ def afficher_page_clients():
             """
             SELECT id, nom, telephone, email, adresse, date_creation
             FROM clients
+            WHERE utilisateur_id = ?
             ORDER BY id DESC
-            """
+            """,
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not clients:
@@ -156,8 +159,8 @@ def afficher_page_clients():
             ):
                 with closing(obtenir_connexion()) as connexion:
                     connexion.execute(
-                        "DELETE FROM clients WHERE id = ?",
-                        (client["id"],)
+                        "DELETE FROM clients WHERE id = ? AND utilisateur_id = ?",
+                        (client["id"], st.session_state.utilisateur_id)
                     )
                     connexion.commit()
 
@@ -177,9 +180,9 @@ def afficher_page_clients():
                 """
                 SELECT id, nom, telephone, email, adresse
                 FROM clients
-                WHERE id = ?
+                WHERE id = ? AND utilisateur_id = ?
                 """,
-                (id_client,)
+                (id_client, st.session_state.utilisateur_id)
             ).fetchone()
 
         if client:
@@ -218,14 +221,15 @@ def afficher_page_clients():
                                 """
                                 UPDATE clients
                                 SET nom = ?, telephone = ?, email = ?, adresse = ?
-                                WHERE id = ?
+                                WHERE id = ? AND utilisateur_id = ?
                                 """,
                                 (
                                     nouveau_nom.strip(),
                                     nouveau_telephone.strip(),
                                     nouvel_email.strip(),
                                     nouvelle_adresse.strip(),
-                                    id_client
+                                    id_client,
+                                    st.session_state.utilisateur_id
                                 )
                             )
                             connexion.commit()

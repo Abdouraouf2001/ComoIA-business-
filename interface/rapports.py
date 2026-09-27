@@ -75,6 +75,7 @@ def afficher_page_rapports():
     date_fin_sql = date_fin.isoformat()
 
     connexion = obtenir_connexion()
+    uid = st.session_state.utilisateur_id
 
     # ==========================================================
     # INDICATEURS DE LA PÉRIODE
@@ -84,18 +85,18 @@ def afficher_page_rapports():
         """
         SELECT COALESCE(SUM(montant_total), 0)
         FROM ventes
-        WHERE date(date_vente) BETWEEN ? AND ?
+        WHERE date(date_vente) BETWEEN ? AND ? AND utilisateur_id = ?
         """,
-        (date_debut_sql, date_fin_sql)
+        (date_debut_sql, date_fin_sql, uid)
     ).fetchone()[0]
 
     total_depenses = connexion.execute(
         """
         SELECT COALESCE(SUM(montant), 0)
         FROM depenses
-        WHERE date(date_depense) BETWEEN ? AND ?
+        WHERE date(date_depense) BETWEEN ? AND ? AND utilisateur_id = ?
         """,
-        (date_debut_sql, date_fin_sql)
+        (date_debut_sql, date_fin_sql, uid)
     ).fetchone()[0]
 
     benefice = chiffre_affaires - total_depenses
@@ -104,9 +105,9 @@ def afficher_page_rapports():
         """
         SELECT COUNT(*)
         FROM ventes
-        WHERE date(date_vente) BETWEEN ? AND ?
+        WHERE date(date_vente) BETWEEN ? AND ? AND utilisateur_id = ?
         """,
-        (date_debut_sql, date_fin_sql)
+        (date_debut_sql, date_fin_sql, uid)
     ).fetchone()[0]
 
     st.markdown('<p style="font-size:14px;font-weight:600;margin:6px 0;">🗓️ Sur la période sélectionnée</p>', unsafe_allow_html=True)
@@ -127,15 +128,16 @@ def afficher_page_rapports():
     # ==========================================================
 
     nombre_clients = connexion.execute(
-        "SELECT COUNT(*) FROM clients"
+        "SELECT COUNT(*) FROM clients WHERE utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     nombre_produits = connexion.execute(
-        "SELECT COUNT(*) FROM produits"
+        "SELECT COUNT(*) FROM produits WHERE utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     produits_alerte = connexion.execute(
-        "SELECT COUNT(*) FROM produits WHERE quantite <= seuil_alerte"
+        "SELECT COUNT(*) FROM produits "
+        "WHERE quantite <= seuil_alerte AND utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     st.markdown('<p style="font-size:14px;font-weight:600;margin:6px 0;">📦 État actuel</p>', unsafe_allow_html=True)
@@ -164,10 +166,11 @@ def afficher_page_rapports():
         LEFT JOIN produits
             ON ventes.produit_id = produits.id
         WHERE date(ventes.date_vente) BETWEEN ? AND ?
+          AND ventes.utilisateur_id = ?
         GROUP BY produits.id, produits.nom
         ORDER BY chiffre_affaires DESC
         """,
-        (date_debut_sql, date_fin_sql)
+        (date_debut_sql, date_fin_sql, uid)
     ).fetchall()
 
     if ventes_produits:
@@ -196,11 +199,11 @@ def afficher_page_rapports():
             COALESCE(categorie, 'Sans catégorie') AS categorie,
             SUM(montant) AS total
         FROM depenses
-        WHERE date(date_depense) BETWEEN ? AND ?
+        WHERE date(date_depense) BETWEEN ? AND ? AND utilisateur_id = ?
         GROUP BY categorie
         ORDER BY total DESC
         """,
-        (date_debut_sql, date_fin_sql)
+        (date_debut_sql, date_fin_sql, uid)
     ).fetchall()
 
     if depenses_categories:
@@ -224,9 +227,10 @@ def afficher_page_rapports():
         """
         SELECT nom, quantite, seuil_alerte
         FROM produits
-        WHERE quantite <= seuil_alerte
+        WHERE quantite <= seuil_alerte AND utilisateur_id = ?
         ORDER BY quantite ASC
-        """
+        """,
+        (uid,)
     ).fetchall()
 
     connexion.close()

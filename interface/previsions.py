@@ -57,7 +57,8 @@ def afficher_page_previsions():
     # VÉRIFICATION DE L'HISTORIQUE DISPONIBLE
     # ==========================================
 
-    analyse = analyser_historique()
+    uid = st.session_state.utilisateur_id
+    analyse = analyser_historique(uid)
 
     if not analyse["disponible"]:
         st.info(f"ℹ️ {analyse['message']}")
@@ -72,8 +73,8 @@ def afficher_page_previsions():
     # PRÉVISION DU CHIFFRE D'AFFAIRES
     # ==========================================
 
-    prevision_7 = prevoir_chiffre_affaires_moyenne_mobile(7)
-    prevision_30 = prevoir_chiffre_affaires_moyenne_mobile(30)
+    prevision_7 = prevoir_chiffre_affaires_moyenne_mobile(uid, 7)
+    prevision_30 = prevoir_chiffre_affaires_moyenne_mobile(uid, 30)
 
     st.markdown(
         '<p class="section-title">💰 Chiffre d\'affaires prévu</p>',
@@ -119,7 +120,7 @@ def afficher_page_previsions():
     # HISTORIQUE + PROJECTION (GRAPHIQUE)
     # ==========================================
 
-    ventes = obtenir_ventes_quotidiennes()
+    ventes = obtenir_ventes_quotidiennes(uid)
     donnees = pd.DataFrame(ventes).tail(30)
     donnees["jour"] = pd.to_datetime(donnees["jour"])
     donnees["type"] = "Historique"
@@ -173,7 +174,8 @@ def afficher_page_previsions():
 
     with closing(obtenir_connexion()) as connexion:
         produits = connexion.execute(
-            "SELECT id, nom FROM produits ORDER BY nom ASC"
+            "SELECT id, nom FROM produits WHERE utilisateur_id = ? ORDER BY nom ASC",
+            (uid,)
         ).fetchall()
 
     if produits:
@@ -186,7 +188,7 @@ def afficher_page_previsions():
         produit_choisi = st.selectbox("Produit", list(noms_produits.keys()))
         id_produit = noms_produits[produit_choisi]
 
-        historique_produit = obtenir_historique_produit(id_produit)
+        historique_produit = obtenir_historique_produit(uid, id_produit)
 
         if len(historique_produit) < 7:
             st.info(
@@ -229,3 +231,4 @@ def afficher_page_previsions():
             ).properties(height=160)
 
             st.altair_chart(barres, use_container_width=True)
+

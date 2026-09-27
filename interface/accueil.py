@@ -1,3 +1,4 @@
+
 import textwrap
 
 import pandas as pd
@@ -13,31 +14,35 @@ ROUGE = "#D64545"
 def afficher_page_accueil():
 
     connexion = obtenir_connexion()
+    uid = st.session_state.utilisateur_id
 
     # ==========================================
     # STATISTIQUES GÉNÉRALES
     # ==========================================
 
     chiffre_affaires = connexion.execute(
-        "SELECT COALESCE(SUM(montant_total), 0) FROM ventes"
+        "SELECT COALESCE(SUM(montant_total), 0) FROM ventes WHERE utilisateur_id = ?",
+        (uid,)
     ).fetchone()[0]
 
     total_depenses = connexion.execute(
-        "SELECT COALESCE(SUM(montant), 0) FROM depenses"
+        "SELECT COALESCE(SUM(montant), 0) FROM depenses WHERE utilisateur_id = ?",
+        (uid,)
     ).fetchone()[0]
 
     benefice = chiffre_affaires - total_depenses
 
     nombre_produits = connexion.execute(
-        "SELECT COUNT(*) FROM produits"
+        "SELECT COUNT(*) FROM produits WHERE utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     nombre_clients = connexion.execute(
-        "SELECT COUNT(*) FROM clients"
+        "SELECT COUNT(*) FROM clients WHERE utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     stocks_faibles = connexion.execute(
-        "SELECT COUNT(*) FROM produits WHERE quantite <= seuil_alerte"
+        "SELECT COUNT(*) FROM produits "
+        "WHERE quantite <= seuil_alerte AND utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
     # ==========================================
@@ -49,7 +54,9 @@ def afficher_page_accueil():
         SELECT COALESCE(SUM(montant_total), 0)
         FROM ventes
         WHERE date(date_vente) >= date('now', 'localtime', 'start of month')
-        """
+          AND utilisateur_id = ?
+        """,
+        (uid,)
     ).fetchone()[0]
 
     ca_mois_dernier = connexion.execute(
@@ -59,7 +66,9 @@ def afficher_page_accueil():
         WHERE date(date_vente)
               >= date('now', 'localtime', 'start of month', '-1 month')
           AND date(date_vente) < date('now', 'localtime', 'start of month')
-        """
+          AND utilisateur_id = ?
+        """,
+        (uid,)
     ).fetchone()[0]
 
     dep_mois = connexion.execute(
@@ -67,7 +76,9 @@ def afficher_page_accueil():
         SELECT COALESCE(SUM(montant), 0)
         FROM depenses
         WHERE date(date_depense) >= date('now', 'localtime', 'start of month')
-        """
+          AND utilisateur_id = ?
+        """,
+        (uid,)
     ).fetchone()[0]
 
     dep_mois_dernier = connexion.execute(
@@ -77,7 +88,9 @@ def afficher_page_accueil():
         WHERE date(date_depense)
               >= date('now', 'localtime', 'start of month', '-1 month')
           AND date(date_depense) < date('now', 'localtime', 'start of month')
-        """
+          AND utilisateur_id = ?
+        """,
+        (uid,)
     ).fetchone()[0]
 
     benefice_mois = ca_mois - dep_mois
@@ -101,9 +114,11 @@ def afficher_page_accueil():
         SELECT date(date_vente) AS jour, SUM(montant_total) AS total
         FROM ventes
         WHERE date(date_vente) >= date('now', 'localtime', '-29 days')
+          AND utilisateur_id = ?
         GROUP BY jour
         ORDER BY jour
-        """
+        """,
+        (uid,)
     ).fetchall()
 
     # ==========================================
@@ -118,10 +133,12 @@ def afficher_page_accueil():
         FROM ventes
         LEFT JOIN produits
             ON ventes.produit_id = produits.id
+        WHERE ventes.utilisateur_id = ?
         GROUP BY produits.id, produits.nom
         ORDER BY quantite_vendue DESC
         LIMIT 5
-        """
+        """,
+        (uid,)
     ).fetchall()
 
     # ==========================================
@@ -132,10 +149,11 @@ def afficher_page_accueil():
         """
         SELECT nom, quantite, seuil_alerte
         FROM produits
-        WHERE quantite <= seuil_alerte
+        WHERE quantite <= seuil_alerte AND utilisateur_id = ?
         ORDER BY quantite ASC
         LIMIT 3
-        """
+        """,
+        (uid,)
     ).fetchall()
 
     # ==========================================
@@ -148,9 +166,11 @@ def afficher_page_accueil():
         FROM ventes
         LEFT JOIN produits
             ON ventes.produit_id = produits.id
+        WHERE ventes.utilisateur_id = ?
         ORDER BY ventes.id DESC
         LIMIT 3
-        """
+        """,
+        (uid,)
     ).fetchall()
 
     connexion.close()
@@ -330,7 +350,7 @@ def afficher_page_accueil():
 
     st.markdown(
         '<div class="db-header">'
-        '<p class="titre">Tableau de bord</p>'
+        '<p class="titre">🇰🇲 Tableau de bord</p>'
         '<p class="sous-titre">Vue générale de votre activité commerciale</p>'
         '</div>',
         unsafe_allow_html=True
@@ -359,6 +379,9 @@ def afficher_page_accueil():
     with col4:
         carte_kpi("🏦", "Bénéfice total", f"{benefice:,.0f} KMF")
 
+    # ==========================================
+    # CHIFFRES CLÉS GLOBAUX
+    # ==========================================
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
@@ -368,6 +391,10 @@ def afficher_page_accueil():
         carte_mini(nombre_clients, "👥 Clients")
     with col3:
         carte_mini(stocks_faibles, "⚠️ Stock faible")
+
+    # ==========================================
+    # ÉVOLUTION DES VENTES (30 DERNIERS JOURS)
+    # ==========================================
 
     st.markdown(
         '<div class="section-title">📊 Ventes des 30 derniers jours</div>',
@@ -409,6 +436,10 @@ def afficher_page_accueil():
     else:
         st.info("Aucune vente enregistrée sur les 30 derniers jours.")
 
+    # ==========================================
+    # TOP 5 DES PRODUITS
+    # ==========================================
+
     st.markdown(
         '<div class="section-title">🏆 Top 5 des produits</div>',
         unsafe_allow_html=True
@@ -439,6 +470,10 @@ def afficher_page_accueil():
         st.altair_chart(barres, use_container_width=True)
     else:
         st.info("Aucune vente enregistrée pour le moment.")
+
+    # ==========================================
+    # STOCK FAIBLE
+    # ==========================================
 
     st.markdown(
         '<div class="section-title">⚠️ Produits avec stock faible</div>',
@@ -481,3 +516,4 @@ def afficher_page_accueil():
             )
     else:
         st.info("Aucune vente enregistrée pour le moment.")
+

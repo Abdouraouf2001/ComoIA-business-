@@ -1,3 +1,4 @@
+
 import hashlib
 import sqlite3
 from contextlib import closing
@@ -102,3 +103,63 @@ def obtenir_utilisateur_par_email(email):
         }
 
     return None
+
+
+# ==========================================
+# ADMINISTRATION — LISTER TOUS LES UTILISATEURS
+# ==========================================
+
+def lister_utilisateurs():
+
+    with closing(obtenir_connexion()) as connexion:
+        utilisateurs = connexion.execute(
+            """
+            SELECT id, nom, email, role, provider, date_creation
+            FROM utilisateurs
+            ORDER BY date_creation DESC
+            """
+        ).fetchall()
+
+    return utilisateurs
+
+
+# ==========================================
+# ADMINISTRATION — COMPTER PAR RÔLE
+# ==========================================
+
+def compter_utilisateurs_par_role():
+
+    with closing(obtenir_connexion()) as connexion:
+        lignes = connexion.execute(
+            "SELECT role, COUNT(*) AS total FROM utilisateurs GROUP BY role"
+        ).fetchall()
+
+    return {ligne["role"]: ligne["total"] for ligne in lignes}
+
+
+# ==========================================
+# ADMINISTRATION — MODIFIER LE RÔLE D'UN UTILISATEUR
+# ==========================================
+
+def modifier_role_utilisateur(utilisateur_id, nouveau_role):
+
+    with closing(obtenir_connexion()) as connexion:
+        connexion.execute(
+            "UPDATE utilisateurs SET role = ? WHERE id = ?",
+            (nouveau_role, utilisateur_id)
+        )
+        connexion.commit()
+
+
+# ==========================================
+# ADMINISTRATION — SUPPRIMER UN UTILISATEUR
+# ==========================================
+
+def supprimer_utilisateur(utilisateur_id):
+
+    with closing(obtenir_connexion()) as connexion:
+        connexion.execute(
+            "DELETE FROM utilisateurs WHERE id = ?",
+            (utilisateur_id,)
+        )
+        connexion.commit()

@@ -1,3 +1,4 @@
+
 from contextlib import closing
 
 import streamlit as st
@@ -49,13 +50,15 @@ def afficher_page_stock():
             SELECT id, nom, categorie, prix_achat, prix_vente,
                    quantite, seuil_alerte
             FROM produits
+            WHERE utilisateur_id = ?
             ORDER BY nom ASC
-            """
+            """,
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not produits:
         st.info(
-            " Aucun produit disponible. "
+            "📦 Aucun produit disponible. "
             "Ajoutez d'abord des produits dans la section Produits."
         )
         return
@@ -73,7 +76,7 @@ def afficher_page_stock():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(" Produits", total_produits)
+        st.metric("📦 Produits", total_produits)
     with col2:
         st.metric("📊 Quantité totale", stock_total)
     with col3:
@@ -130,7 +133,7 @@ def afficher_page_stock():
             )
             st.markdown(
                 f'<div class="ligne-item">'
-                f'<div class="nom"> {produit["nom"]}{categorie_txt}</div>'
+                f'<div class="nom">📦 {produit["nom"]}{categorie_txt}</div>'
                 f'<div class="meta">Seuil d\'alerte : {seuil}</div>'
                 f'<span class="badge-statut" '
                 f'style="color:{couleur};background:{fond};">{statut}</span>'
@@ -156,8 +159,10 @@ def afficher_page_stock():
             ):
                 with closing(obtenir_connexion()) as connexion:
                     connexion.execute(
-                        "UPDATE produits SET quantite = ? WHERE id = ?",
-                        (nouvelle_quantite, produit["id"])
+                        "UPDATE produits SET quantite = ? "
+                        "WHERE id = ? AND utilisateur_id = ?",
+                        (nouvelle_quantite, produit["id"],
+                         st.session_state.utilisateur_id)
                     )
                     connexion.commit()
 

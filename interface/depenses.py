@@ -80,10 +80,12 @@ def afficher_page_depenses():
                 with closing(obtenir_connexion()) as connexion:
                     connexion.execute(
                         """
-                        INSERT INTO depenses (description, montant, categorie)
-                        VALUES (?, ?, ?)
+                        INSERT INTO depenses
+                        (description, montant, categorie, utilisateur_id)
+                        VALUES (?, ?, ?, ?)
                         """,
-                        (description.strip(), montant, categorie)
+                        (description.strip(), montant, categorie,
+                         st.session_state.utilisateur_id)
                     )
                     connexion.commit()
 
@@ -101,8 +103,10 @@ def afficher_page_depenses():
             """
             SELECT id, description, montant, categorie, date_depense
             FROM depenses
+            WHERE utilisateur_id = ?
             ORDER BY date_depense DESC
-            """
+            """,
+            (st.session_state.utilisateur_id,)
         ).fetchall()
 
     if not depenses:
@@ -144,11 +148,10 @@ def afficher_page_depenses():
             ):
                 with closing(obtenir_connexion()) as connexion:
                     connexion.execute(
-                        "DELETE FROM depenses WHERE id = ?",
-                        (depense["id"],)
+                        "DELETE FROM depenses WHERE id = ? AND utilisateur_id = ?",
+                        (depense["id"], st.session_state.utilisateur_id)
                     )
                     connexion.commit()
 
                 st.session_state["message_depense"] = "Dépense supprimée."
                 st.rerun()
-

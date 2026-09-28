@@ -1,3 +1,4 @@
+
 from database.connexion import obtenir_connexion
 
 
@@ -104,6 +105,48 @@ def creer_tables():
         """
     )
     _ajouter_colonne_si_absente(curseur, "clients", "utilisateur_id", "INTEGER")
+
+    # ==========================================
+    # TABLE FACTURES
+    # ==========================================
+    curseur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS factures (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            numero TEXT NOT NULL,
+            client_id INTEGER,
+            utilisateur_id INTEGER,
+            total_brut REAL NOT NULL,
+            remise REAL DEFAULT 0,
+            total_final REAL NOT NULL,
+            note TEXT,
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES clients(id)
+        )
+        """
+    )
+    # La table peut déjà exister (créée avant l'ajout du cloisonnement par
+    # compte) : CREATE TABLE IF NOT EXISTS ne la modifierait pas, donc on
+    # ajoute la colonne à part si elle manque.
+    _ajouter_colonne_si_absente(curseur, "factures", "utilisateur_id", "INTEGER")
+
+    # ==========================================
+    # TABLE LIGNES DE FACTURE
+    # ==========================================
+    curseur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lignes_facture (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            facture_id INTEGER NOT NULL,
+            produit_id INTEGER,
+            quantite INTEGER NOT NULL,
+            prix_unitaire REAL NOT NULL,
+            montant REAL NOT NULL,
+            FOREIGN KEY (facture_id) REFERENCES factures(id),
+            FOREIGN KEY (produit_id) REFERENCES produits(id)
+        )
+        """
+    )
 
     # ==========================================
     # TABLE TOKENS DE RECUPERATION

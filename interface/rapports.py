@@ -1,6 +1,8 @@
+
 import datetime
 
 import streamlit as st
+from config.colors import BORDURE, JAUNE_BORDURE, JAUNE_FOND, TEXTE_SECONDAIRE
 from database.connexion import obtenir_connexion
 
 PERIODES = [
@@ -38,7 +40,7 @@ def afficher_page_rapports():
     st.markdown(
         '<p style="font-size:20px;font-weight:700;margin-bottom:2px;">'
         '📈 Rapports</p>'
-        '<p style="font-size:13px;color:#6B7280;margin-bottom:10px;">'
+        f'<p style="font-size:13px;color:{TEXTE_SECONDAIRE};margin-bottom:10px;">'
         'Analyse de l\'activité de votre entreprise.</p>',
         unsafe_allow_html=True
     )
@@ -179,7 +181,7 @@ def afficher_page_rapports():
             quantite = vente["quantite_vendue"] or 0
             montant = vente["chiffre_affaires"] or 0
             st.markdown(
-                f'<div style="font-size:13px;padding:4px 0;border-bottom:1px solid #F1F1F1;">'
+                f'<div style="font-size:13px;padding:4px 0;border-bottom:1px solid {BORDURE};">'
                 f'<strong>{produit}</strong> — {quantite} unité(s) — {montant:,.0f} KMF'
                 f'</div>',
                 unsafe_allow_html=True
@@ -209,7 +211,7 @@ def afficher_page_rapports():
     if depenses_categories:
         for depense in depenses_categories:
             st.markdown(
-                f'<div style="font-size:13px;padding:4px 0;border-bottom:1px solid #F1F1F1;">'
+                f'<div style="font-size:13px;padding:4px 0;border-bottom:1px solid {BORDURE};">'
                 f'<strong>{depense["categorie"]}</strong> — {depense["total"] or 0:,.0f} KMF'
                 f'</div>',
                 unsafe_allow_html=True
@@ -238,8 +240,8 @@ def afficher_page_rapports():
     if quantite_faibles:
         for produit in quantite_faibles:
             st.markdown(
-                f'<div style="font-size:13px;background:#FFF8E1;'
-                f'border:1px solid #FFE082;border-radius:8px;'
+                f'<div style="font-size:13px;background:{JAUNE_FOND};'
+                f'border:1px solid {JAUNE_BORDURE};border-radius:8px;'
                 f'padding:6px 10px;margin-bottom:5px;">'
                 f'<strong>{produit["nom"]}</strong> — '
                 f'Stock : {produit["quantite"]} | '
@@ -249,3 +251,4 @@ def afficher_page_rapports():
             )
     else:
         st.success("✅ Aucun produit n'est actuellement sous le seuil minimum.")
+ 

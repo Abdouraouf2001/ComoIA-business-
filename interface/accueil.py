@@ -1,14 +1,27 @@
-
 import textwrap
 
 import pandas as pd
 import altair as alt
 import streamlit as st
+from config.colors import (
+    BANNIERE_SOUS_TITRE,
+    BORDURE,
+    FOND_CARTE,
+    GRILLE_GRAPHIQUE,
+    JAUNE_BORDURE,
+    JAUNE_FOND,
+    OMBRE_CARTE,
+    ROUGE,
+    ROUGE_FOND,
+    TEXTE_MUET,
+    TEXTE_PRINCIPAL,
+    TEXTE_SECONDAIRE,
+    VERT,
+    VERT_CLAIR,
+    VERT_FOND,
+    VERT_FONCE,
+)
 from database.connexion import obtenir_connexion
-
-VERT = "#00843D"
-VERT_CLAIR = "#A8D5BA"
-ROUGE = "#D64545"
 
 
 def afficher_page_accueil():
@@ -183,125 +196,125 @@ def afficher_page_accueil():
 
     st.markdown(
         textwrap.dedent(
-            """
+            f"""
             <style>
-            .db-header {
-                background: linear-gradient(135deg, #00843D 0%, #00602B 100%);
+            .db-header {{
+                background: linear-gradient(135deg, {VERT} 0%, {VERT_FONCE} 100%);
                 border-radius: 14px;
                 padding: 14px 18px;
                 margin-bottom: 14px;
-            }
-            .db-header .titre {
-                color: white;
+            }}
+            .db-header .titre {{
+                color: {FOND_CARTE};
                 font-size: 20px;
                 font-weight: 700;
                 margin: 0;
-            }
-            .db-header .sous-titre {
-                color: rgba(255,255,255,0.85);
+            }}
+            .db-header .sous-titre {{
+                color: {BANNIERE_SOUS_TITRE};
                 font-size: 12px;
                 margin-top: 2px;
-            }
-            .section-title {
-                color: #1A1A1A;
+            }}
+            .section-title {{
+                color: {TEXTE_PRINCIPAL};
                 font-size: 15px;
                 font-weight: 700;
                 margin: 16px 0 8px 0;
-            }
-            .kpi-card {
-                background: white;
+            }}
+            .kpi-card {{
+                background: {FOND_CARTE};
                 border-radius: 12px;
-                border: 1px solid #EAECEF;
-                box-shadow: 0 1px 6px rgba(16,24,40,0.04);
+                border: 1px solid {BORDURE};
+                box-shadow: 0 1px 6px {OMBRE_CARTE};
                 padding: 10px 12px;
                 min-height: 92px;
-            }
-            .kpi-icon {
+            }}
+            .kpi-icon {{
                 width: 26px;
                 height: 26px;
                 border-radius: 7px;
-                background: #E6F4EA;
+                background: {VERT_FOND};
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 13px;
                 margin-bottom: 6px;
-            }
-            .kpi-label {
-                color: #6B7280;
+            }}
+            .kpi-label {{
+                color: {TEXTE_SECONDAIRE};
                 font-size: 11px;
                 font-weight: 500;
                 margin-bottom: 2px;
-            }
-            .kpi-value {
-                color: #111827;
+            }}
+            .kpi-value {{
+                color: {TEXTE_PRINCIPAL};
                 font-size: 16px;
                 font-weight: 700;
                 margin-bottom: 4px;
-            }
-            .trend-badge {
+            }}
+            .trend-badge {{
                 display: inline-block;
                 font-size: 10px;
                 font-weight: 600;
                 padding: 2px 7px;
                 border-radius: 999px;
-            }
-            .stat-mini {
-                background: white;
+            }}
+            .stat-mini {{
+                background: {FOND_CARTE};
                 border-radius: 10px;
-                border: 1px solid #EAECEF;
+                border: 1px solid {BORDURE};
                 padding: 8px 10px;
                 text-align: center;
-            }
-            .stat-mini .valeur {
+            }}
+            .stat-mini .valeur {{
                 font-size: 16px;
                 font-weight: 700;
-                color: #111827;
-            }
-            .stat-mini .libelle {
+                color: {TEXTE_PRINCIPAL};
+            }}
+            .stat-mini .libelle {{
                 font-size: 11px;
-                color: #6B7280;
+                color: {TEXTE_SECONDAIRE};
                 margin-top: 1px;
-            }
-            .alert-card {
-                background-color: #FFF8E1;
+            }}
+            .alert-card {{
+                background-color: {JAUNE_FOND};
                 padding: 8px 12px;
                 border-radius: 10px;
-                border: 1px solid #FFE082;
+                border: 1px solid {JAUNE_BORDURE};
                 margin-bottom: 6px;
                 font-size: 12px;
-            }
-            .vente-row {
+            }}
+            .vente-row {{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                background: white;
-                border: 1px solid #EAECEF;
+                background: {FOND_CARTE};
+                border: 1px solid {BORDURE};
                 border-radius: 10px;
                 padding: 8px 12px;
                 margin-bottom: 6px;
-            }
-            .vente-row .nom { font-weight: 600; color: #111827; font-size: 12px; }
-            .vente-row .date { color: #9CA3AF; font-size: 10px; }
-            .vente-row .montant { font-weight: 700; color: #00843D; font-size: 12px; }
+            }}
+            .vente-row .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; font-size: 12px; }}
+            .vente-row .date {{ color: {TEXTE_MUET}; font-size: 10px; }}
+            .vente-row .montant {{ font-weight: 700; color: {VERT}; font-size: 12px; }}
 
             /* Écrans étroits (téléphone) : Streamlit empile déjà les
                colonnes tout seul, on réduit juste texte/espacements */
-            @media (max-width: 640px) {
-                .db-header { padding: 10px 14px; border-radius: 12px; }
-                .db-header .titre { font-size: 17px; }
-                .db-header .sous-titre { font-size: 11px; }
-                .section-title { font-size: 13px; margin: 12px 0 6px 0; }
-                .kpi-card { padding: 8px 10px; min-height: auto; }
-                .kpi-icon { width: 22px; height: 22px; font-size: 11px; }
-                .kpi-label { font-size: 10px; }
-                .kpi-value { font-size: 14px; }
-                .trend-badge { font-size: 9px; padding: 1px 6px; }
-                .stat-mini { padding: 6px 8px; }
-                .stat-mini .valeur { font-size: 14px; }
-                .stat-mini .libelle { font-size: 10px; }
-                .alert-card, .vente-row { padding: 6px 10px; }
-            }
+            @media (max-width: 640px) {{
+                .db-header {{ padding: 10px 14px; border-radius: 12px; }}
+                .db-header .titre {{ font-size: 17px; }}
+                .db-header .sous-titre {{ font-size: 11px; }}
+                .section-title {{ font-size: 13px; margin: 12px 0 6px 0; }}
+                .kpi-card {{ padding: 8px 10px; min-height: auto; }}
+                .kpi-icon {{ width: 22px; height: 22px; font-size: 11px; }}
+                .kpi-label {{ font-size: 10px; }}
+                .kpi-value {{ font-size: 14px; }}
+                .trend-badge {{ font-size: 9px; padding: 1px 6px; }}
+                .stat-mini {{ padding: 6px 8px; }}
+                .stat-mini .valeur {{ font-size: 14px; }}
+                .stat-mini .libelle {{ font-size: 10px; }}
+                .alert-card, .vente-row {{ padding: 6px 10px; }}
+            }}
             </style>
             """
         ),
@@ -318,7 +331,7 @@ def afficher_page_accueil():
             positif = variation >= 0
             bon = positif if not inverse else not positif
             couleur = VERT if bon else ROUGE
-            fond = "#E6F4EA" if bon else "#FDECEC"
+            fond = VERT_FOND if bon else ROUGE_FOND
             fleche = "▲" if positif else "▼"
             badge = (
                 f'<span class="trend-badge" '
@@ -424,7 +437,7 @@ def afficher_page_accueil():
             x=alt.X("jour:T", title=None, axis=alt.Axis(grid=False)),
             y=alt.Y(
                 "ventes:Q", title=None,
-                axis=alt.Axis(grid=True, gridColor="#F0F0F0")
+                axis=alt.Axis(grid=True, gridColor=GRILLE_GRAPHIQUE)
             ),
             tooltip=[
                 alt.Tooltip("jour:T", title="Date", format="%d/%m/%Y"),

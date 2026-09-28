@@ -1,6 +1,9 @@
 from contextlib import closing
 
 import streamlit as st
+from config.colors import (
+    BORDURE, FOND_CARTE, ROUGE, TEXTE_MUET, TEXTE_PRINCIPAL, TEXTE_SECONDAIRE,
+)
 from database.connexion import obtenir_connexion
 
 CATEGORIES = [
@@ -12,22 +15,22 @@ CATEGORIES = [
 def afficher_page_depenses():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .ligne-item {
+        .ligne-item {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            border: 1px solid #EAECEF;
+            background: {FOND_CARTE};
+            border: 1px solid {BORDURE};
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 6px;
             font-size: 13px;
-        }
-        .ligne-item .nom { font-weight: 600; color: #111827; }
-        .ligne-item .meta { color: #9CA3AF; font-size: 11px; }
-        .ligne-item .montant { font-weight: 700; color: #D64545; }
+        }}
+        .ligne-item .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; }}
+        .ligne-item .meta {{ color: {TEXTE_MUET}; font-size: 11px; }}
+        .ligne-item .montant {{ font-weight: 700; color: {ROUGE}; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -36,7 +39,7 @@ def afficher_page_depenses():
     st.markdown(
         '<p style="font-size:20px;font-weight:700;margin-bottom:2px;">'
         '💳 Dépenses</p>'
-        '<p style="font-size:13px;color:#6B7280;margin-bottom:10px;">'
+        f'<p style="font-size:13px;color:{TEXTE_SECONDAIRE};margin-bottom:10px;">'
         'Enregistrez et suivez les dépenses de votre entreprise.</p>',
         unsafe_allow_html=True
     )
@@ -118,7 +121,7 @@ def afficher_page_depenses():
     st.markdown(
         f'<p style="font-size:14px;font-weight:600;margin:10px 0 6px;">'
         f'📋 Historique ({len(depenses)}) • Total '
-        f'<span style="color:#D64545;">{total_depenses:,.0f} KMF</span></p>',
+        f'<span style="color:{ROUGE};">{total_depenses:,.0f} KMF</span></p>',
         unsafe_allow_html=True
     )
 

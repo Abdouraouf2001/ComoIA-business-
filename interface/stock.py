@@ -1,32 +1,36 @@
-
 from contextlib import closing
 
 import streamlit as st
+from config.colors import (
+    BORDURE, FOND_CARTE, ORANGE_FOND, ORANGE_FONCE, ROUGE_FOND,
+    ROUGE_FONCE, TEXTE_MUET, TEXTE_PRINCIPAL, TEXTE_SECONDAIRE,
+    VERT_FOND, VERT_FONCE_TEXTE,
+)
 from database.connexion import obtenir_connexion
 
 
 def afficher_page_stock():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .ligne-item {
-            background: white;
-            border: 1px solid #EAECEF;
+        .ligne-item {{
+            background: {FOND_CARTE};
+            border: 1px solid {BORDURE};
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 6px;
             font-size: 13px;
-        }
-        .ligne-item .nom { font-weight: 600; color: #111827; }
-        .ligne-item .meta { color: #9CA3AF; font-size: 11px; }
-        .badge-statut {
+        }}
+        .ligne-item .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; }}
+        .ligne-item .meta {{ color: {TEXTE_MUET}; font-size: 11px; }}
+        .badge-statut {{
             font-size: 11px;
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 999px;
             white-space: nowrap;
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -35,7 +39,7 @@ def afficher_page_stock():
     st.markdown(
         '<p style="font-size:20px;font-weight:700;margin-bottom:2px;">'
         '📊 Gestion du stock</p>'
-        '<p style="font-size:13px;color:#6B7280;margin-bottom:10px;">'
+        f'<p style="font-size:13px;color:{TEXTE_SECONDAIRE};margin-bottom:10px;">'
         'Suivez les quantités disponibles et identifiez rapidement '
         'les produits à réapprovisionner.</p>',
         unsafe_allow_html=True
@@ -119,11 +123,11 @@ def afficher_page_stock():
         seuil = produit["seuil_alerte"]
 
         if quantite == 0:
-            statut, couleur, fond = "Rupture", "#791F1F", "#FCEBEB"
+            statut, couleur, fond = "Rupture", ROUGE_FONCE, ROUGE_FOND
         elif quantite <= seuil:
-            statut, couleur, fond = "Stock faible", "#854F0B", "#FAEEDA"
+            statut, couleur, fond = "Stock faible", ORANGE_FONCE, ORANGE_FOND
         else:
-            statut, couleur, fond = "Disponible", "#085041", "#E1F5EE"
+            statut, couleur, fond = "Disponible", VERT_FONCE_TEXTE, VERT_FOND
 
         col_info, col_qte, col_action = st.columns([4, 2, 2])
 

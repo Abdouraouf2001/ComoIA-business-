@@ -1,3 +1,4 @@
+
 import io
 import sqlite3
 from contextlib import closing
@@ -6,10 +7,8 @@ import pandas as pd
 import streamlit as st
 from fpdf import FPDF
 
+from config.colors import BORDURE, ROUGE, ROUGE_FOND, TEXTE_MUET, TEXTE_PRINCIPAL, TEXTE_SECONDAIRE, VERT, VERT_FOND
 from database.connexion import obtenir_connexion
-
-VERT = "#00843D"
-ROUGE = "#D64545"
 
 
 def generer_excel(produits):
@@ -37,7 +36,7 @@ def generer_pdf(produits):
     pdf.add_page()
 
     pdf.set_font("Helvetica", "B", 16)
-    pdf.set_text_color(0, 132, 61)
+    pdf.set_text_color(0, 132, 61)  # équivalent RGB de config.colors.VERT
     pdf.cell(0, 10, "ComorIA Business - Liste des produits", ln=True)
     pdf.set_text_color(0, 0, 0)
     pdf.set_font("Helvetica", "", 9)
@@ -69,28 +68,28 @@ def generer_pdf(produits):
 def afficher_page_produits():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .ligne-item {
+        .ligne-item {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: white;
-            border: 1px solid #EAECEF;
+            border: 1px solid {BORDURE};
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 6px;
             font-size: 13px;
-        }
-        .ligne-item .nom { font-weight: 600; color: #111827; }
-        .ligne-item .meta { color: #9CA3AF; font-size: 11px; }
-        .badge-stock {
+        }}
+        .ligne-item .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; }}
+        .ligne-item .meta {{ color: {TEXTE_MUET}; font-size: 11px; }}
+        .badge-stock {{
             font-size: 11px;
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 999px;
             white-space: nowrap;
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -99,7 +98,7 @@ def afficher_page_produits():
     st.markdown(
         '<p style="font-size:20px;font-weight:700;margin-bottom:2px;">'
         '📦 Produits</p>'
-        '<p style="font-size:13px;color:#6B7280;margin-bottom:10px;">'
+        f'<p style="font-size:13px;color:{TEXTE_SECONDAIRE};margin-bottom:10px;">'
         'Gérez vos produits, leurs prix et leurs quantités en stock.</p>',
         unsafe_allow_html=True
     )
@@ -265,7 +264,7 @@ def afficher_page_produits():
         with col_info:
             faible = produit["quantite"] <= produit["seuil_alerte"]
             couleur_badge = ROUGE if faible else VERT
-            fond_badge = "#FDECEC" if faible else "#E6F4EA"
+            fond_badge = ROUGE_FOND if faible else VERT_FOND
             categorie_txt = f' • {produit["categorie"]}' if produit["categorie"] else ""
 
             st.markdown(

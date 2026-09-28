@@ -1,7 +1,10 @@
-
 import textwrap
 
 import streamlit as st
+from config.colors import (
+    BORDURE, FOND_PAGE, OMBRE_CARTE, TEXTE_MUET, TEXTE_PRINCIPAL,
+    TEXTE_SECONDAIRE, VERT, VERT_FONCE,
+)
 from fonctions.utilisateurs import creer_utilisateur
 
 
@@ -9,77 +12,77 @@ def afficher_page_inscription():
 
     st.markdown(
         textwrap.dedent(
-            """
+            f"""
             <style>
-            .stApp {
-                background-color: #F5F7F7;
-            }
-            .login-badge {
+            .stApp {{
+                background-color: {FOND_PAGE};
+            }}
+            .login-badge {{
                 width: 64px;
                 height: 64px;
                 border-radius: 50%;
-                background: #00843D;
+                background: {VERT};
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 28px;
                 margin: 10px auto 18px auto;
-            }
-            .login-title {
+            }}
+            .login-title {{
                 text-align: center;
-                color: #111827;
+                color: {TEXTE_PRINCIPAL};
                 font-size: 24px;
                 font-weight: 700;
                 margin-bottom: 4px;
-            }
-            .login-subtitle {
+            }}
+            .login-subtitle {{
                 text-align: center;
-                color: #6B7280;
+                color: {TEXTE_SECONDAIRE};
                 font-size: 14px;
                 margin-bottom: 28px;
-            }
-            .login-section {
+            }}
+            .login-section {{
                 text-align: center;
-                color: #374151;
+                color: {TEXTE_PRINCIPAL};
                 font-size: 15px;
                 font-weight: 600;
                 margin: 6px 0 18px 0;
-            }
-            .login-divider {
+            }}
+            .login-divider {{
                 display: flex;
                 align-items: center;
                 text-align: center;
-                color: #9CA3AF;
+                color: {TEXTE_MUET};
                 font-size: 12px;
                 margin: 18px 0;
-            }
+            }}
             .login-divider::before,
-            .login-divider::after {
+            .login-divider::after {{
                 content: "";
                 flex: 1;
-                border-bottom: 1px solid #E5E7EB;
-            }
-            .login-divider:not(:empty)::before { margin-right: 12px; }
-            .login-divider:not(:empty)::after { margin-left: 12px; }
-            .login-footer {
+                border-bottom: 1px solid {BORDURE};
+            }}
+            .login-divider:not(:empty)::before {{ margin-right: 12px; }}
+            .login-divider:not(:empty)::after {{ margin-left: 12px; }}
+            .login-footer {{
                 text-align: center;
-                color: #9CA3AF;
+                color: {TEXTE_MUET};
                 margin-top: 36px;
                 font-size: 12px;
-            }
-            .stButton > button[kind="primary"] {
-                background-color: #00843D;
-                border-color: #00843D;
-            }
-            .stButton > button[kind="primary"]:hover {
-                background-color: #006B32;
-                border-color: #006B32;
-            }
-            @media (max-width: 640px) {
-                .login-badge { width: 48px; height: 48px; font-size: 22px; }
-                .login-title { font-size: 19px; }
-                .login-subtitle { font-size: 12px; }
-            }
+            }}
+            .stButton > button[kind="primary"] {{
+                background-color: {VERT};
+                border-color: {VERT};
+            }}
+            .stButton > button[kind="primary"]:hover {{
+                background-color: {VERT_FONCE};
+                border-color: {VERT_FONCE};
+            }}
+            @media (max-width: 640px) {{
+                .login-badge {{ width: 48px; height: 48px; font-size: 22px; }}
+                .login-title {{ font-size: 19px; }}
+                .login-subtitle {{ font-size: 12px; }}
+            }}
             </style>
             """
         ),

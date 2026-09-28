@@ -1,57 +1,56 @@
 from contextlib import closing
 
 import streamlit as st
+from config.colors import FOND_CARTE, FOND_PAGE, VERT, VERT_FONCE
 from database.connexion import obtenir_connexion
 
 
 def afficher_page_assistant_ia():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .assistant-header {
-            background: linear-gradient(135deg, #00843D, #006B32);
-            color: white;
+        .assistant-header {{
+            background: linear-gradient(135deg, {VERT}, {VERT_FONCE});
+            color: {FOND_CARTE};
             padding: 14px 18px;
             border-radius: 14px;
             margin-bottom: 14px;
-        }
-        .assistant-header h2 {
+        }}
+        .assistant-header h2 {{
             margin: 0;
             font-size: 19px;
-        }
-        .assistant-header p {
+        }}
+        .assistant-header p {{
             margin: 4px 0 0 0;
             font-size: 12px;
             opacity: 0.9;
-        }
-        .assistant-section {
+        }}
+        .assistant-section {{
             font-size: 14px;
             font-weight: 600;
             margin: 12px 0 8px 0;
-        }
-        .question-box {
-            background: #F5F7F7;
+        }}
+        .question-box {{
+            background: {FOND_PAGE};
             border-radius: 12px;
             padding: 12px 14px;
             margin-bottom: 8px;
             font-size: 13px;
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True
     )
 
+    # HTML sur une seule ligne (un bloc indenté multi-lignes serait
+    # affiché comme du code brut par Markdown, pas interprété)
     st.markdown(
-        """
-        <div class="assistant-header">
-            <h2>🤖 Assistant IA</h2>
-            <p>
-                Posez une question sur votre activité et ComorIA Business
-                analysera vos données.
-            </p>
-        </div>
-        """,
+        '<div class="assistant-header">'
+        '<h2>🤖 Assistant IA</h2>'
+        '<p>Posez une question sur votre activité et ComorIA Business '
+        'analysera vos données.</p>'
+        '</div>',
         unsafe_allow_html=True
     )
 
@@ -354,3 +353,4 @@ def analyser_question(question, utilisateur_id):
 
         except Exception as erreur:
             return f"❌ Une erreur est survenue lors de l'analyse : {erreur}"
+

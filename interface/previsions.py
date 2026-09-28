@@ -4,6 +4,10 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from database.connexion import obtenir_connexion
+from config.colors import (
+    BANNIERE_SOUS_TITRE, BORDURE, FOND_CARTE, GRILLE_GRAPHIQUE, OMBRE_CARTE,
+    TEXTE_MUET, TEXTE_PRINCIPAL, TEXTE_SECONDAIRE, VERT, VERT_CLAIR, VERT_FONCE,
+)
 from ml.prediction import (
     analyser_historique,
     obtenir_historique_produit,
@@ -11,34 +15,31 @@ from ml.prediction import (
     prevoir_chiffre_affaires_moyenne_mobile,
 )
 
-VERT = "#00843D"
-VERT_CLAIR = "#A8D5BA"
-
 
 def afficher_page_previsions():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .prev-header {
-            background: linear-gradient(135deg, #00843D, #006B32);
+        .prev-header {{
+            background: linear-gradient(135deg, {VERT}, {VERT_FONCE});
             border-radius: 14px;
             padding: 14px 18px;
             margin-bottom: 14px;
-        }
-        .prev-header .titre { color: white; font-size: 19px; font-weight: 700; margin: 0; }
-        .prev-header .sous-titre { color: rgba(255,255,255,0.85); font-size: 12px; margin-top: 2px; }
-        .section-title { font-size: 14px; font-weight: 600; margin: 14px 0 8px 0; }
-        .kpi-card {
-            background: white;
+        }}
+        .prev-header .titre {{ color: {FOND_CARTE}; font-size: 19px; font-weight: 700; margin: 0; }}
+        .prev-header .sous-titre {{ color: {BANNIERE_SOUS_TITRE}; font-size: 12px; margin-top: 2px; }}
+        .section-title {{ font-size: 14px; font-weight: 600; margin: 14px 0 8px 0; }}
+        .kpi-card {{
+            background: {FOND_CARTE};
             border-radius: 12px;
-            border: 1px solid #EAECEF;
-            box-shadow: 0 1px 6px rgba(16,24,40,0.04);
+            border: 1px solid {BORDURE};
+            box-shadow: 0 1px 6px {OMBRE_CARTE};
             padding: 10px 12px;
-        }
-        .kpi-label { color: #6B7280; font-size: 11px; margin-bottom: 3px; }
-        .kpi-value { color: #111827; font-size: 17px; font-weight: 700; }
-        .kpi-note { color: #9CA3AF; font-size: 10px; margin-top: 2px; }
+        }}
+        .kpi-label {{ color: {TEXTE_SECONDAIRE}; font-size: 11px; margin-bottom: 3px; }}
+        .kpi-value {{ color: {TEXTE_PRINCIPAL}; font-size: 17px; font-weight: 700; }}
+        .kpi-note {{ color: {TEXTE_MUET}; font-size: 10px; margin-top: 2px; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -145,7 +146,7 @@ def afficher_page_previsions():
         x=alt.X("jour:T", title=None, axis=alt.Axis(grid=False)),
         y=alt.Y(
             "chiffre_affaires:Q", title=None,
-            axis=alt.Axis(grid=True, gridColor="#F0F0F0")
+            axis=alt.Axis(grid=True, gridColor=GRILLE_GRAPHIQUE)
         ),
         color=alt.Color(
             "type:N",
@@ -231,4 +232,3 @@ def afficher_page_previsions():
             ).properties(height=160)
 
             st.altair_chart(barres, use_container_width=True)
-

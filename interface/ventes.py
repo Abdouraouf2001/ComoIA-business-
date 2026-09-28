@@ -1,28 +1,31 @@
 from contextlib import closing
 
 import streamlit as st
+from config.colors import (
+    BORDURE, FOND_CARTE, TEXTE_MUET, TEXTE_PRINCIPAL, TEXTE_SECONDAIRE, VERT,
+)
 from database.connexion import obtenir_connexion
 
 
 def afficher_page_ventes():
 
     st.markdown(
-        """
+        f"""
         <style>
-        .ligne-item {
+        .ligne-item {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            border: 1px solid #EAECEF;
+            background: {FOND_CARTE};
+            border: 1px solid {BORDURE};
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 6px;
             font-size: 13px;
-        }
-        .ligne-item .nom { font-weight: 600; color: #111827; }
-        .ligne-item .meta { color: #9CA3AF; font-size: 11px; }
-        .ligne-item .montant { font-weight: 700; color: #00843D; }
+        }}
+        .ligne-item .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; }}
+        .ligne-item .meta {{ color: {TEXTE_MUET}; font-size: 11px; }}
+        .ligne-item .montant {{ font-weight: 700; color: {VERT}; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -31,7 +34,7 @@ def afficher_page_ventes():
     st.markdown(
         '<p style="font-size:20px;font-weight:700;margin-bottom:2px;">'
         '💰 Ventes</p>'
-        '<p style="font-size:13px;color:#6B7280;margin-bottom:10px;">'
+        f'<p style="font-size:13px;color:{TEXTE_SECONDAIRE};margin-bottom:10px;">'
         'Enregistrez et consultez les ventes de votre entreprise.</p>',
         unsafe_allow_html=True
     )
@@ -89,7 +92,7 @@ def afficher_page_ventes():
 
             st.markdown(
                 f'<p style="font-size:15px;font-weight:600;margin:8px 0;">'
-                f'💵 Total : <span style="color:#00843D;">'
+                f'💵 Total : <span style="color:{VERT};">'
                 f'{montant_total:,.0f} KMF</span></p>',
                 unsafe_allow_html=True
             )

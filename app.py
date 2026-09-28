@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from config.colors import BORDURE, FOND_CARTE, FOND_PAGE, TEXTE_SECONDAIRE, VERT
 from database.models import creer_tables
 from interface.connexion import afficher_page_connexion
 from interface.inscription import afficher_page_inscription
@@ -10,6 +11,7 @@ from interface.stock import afficher_page_stock
 from interface.ventes import afficher_page_ventes
 from interface.depenses import afficher_page_depenses
 from interface.clients import afficher_page_clients
+from interface.facturation import afficher_page_facturation
 from interface.rapports import afficher_page_rapports
 from interface.assistant_ia import afficher_page_assistant_ia
 from interface.previsions import afficher_page_previsions
@@ -62,18 +64,18 @@ if not st.session_state.connecte:
 # STYLE APPLICATION
 # ==========================================
 st.markdown(
-    """
+    f"""
 <style>
-.stApp {
-    background-color: #F5F7F7;
-}
-.footer {
+.stApp {{
+    background-color: {FOND_PAGE};
+}}
+.footer {{
     text-align: center;
     margin-top: 50px;
     padding: 20px;
-    color: #666666;
-    border-top: 1px solid #DDDDDD;
-}
+    color: {TEXTE_SECONDAIRE};
+    border-top: 1px solid {BORDURE};
+}}
 </style>
 """,
     unsafe_allow_html=True
@@ -107,6 +109,7 @@ options_menu = [
     "Produits",
     "Stock",
     "Ventes",
+    "Facturation",
     "Dépenses",
     "Clients",
     "Rapports",
@@ -118,6 +121,7 @@ icones_menu = [
     "box-seam",
     "bar-chart",
     "cash-coin",
+    "receipt",
     "credit-card",
     "people",
     "graph-up",
@@ -137,7 +141,7 @@ menu = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "0!important", "background-color": "#FFFFFF"},
+        "container": {"padding": "0!important", "background-color": FOND_CARTE},
         "icon": {"font-size": "16px"},
         "nav-link": {
             "font-size": "13px",
@@ -145,7 +149,7 @@ menu = option_menu(
             "margin": "0px",
             "padding": "10px 8px",
         },
-        "nav-link-selected": {"background-color": "#00843D"},
+        "nav-link-selected": {"background-color": VERT},
     },
 )
 
@@ -160,6 +164,8 @@ elif menu == "Stock":
     afficher_page_stock()
 elif menu == "Ventes":
     afficher_page_ventes()
+elif menu == "Facturation":
+    afficher_page_facturation()
 elif menu == "Dépenses":
     afficher_page_depenses()
 elif menu == "Clients":

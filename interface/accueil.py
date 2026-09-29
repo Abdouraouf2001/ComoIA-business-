@@ -1,3 +1,4 @@
+
 import textwrap
 
 import pandas as pd
@@ -30,7 +31,7 @@ def afficher_page_accueil():
     uid = st.session_state.utilisateur_id
 
     # ==========================================
-    # STATISTIQUES GÉNÉRALES
+    # STATISTIQUES
     # ==========================================
 
     chiffre_affaires = connexion.execute(
@@ -58,10 +59,18 @@ def afficher_page_accueil():
         "WHERE quantite <= seuil_alerte AND utilisateur_id = ?", (uid,)
     ).fetchone()[0]
 
-    # ==========================================
-    # COMPARATIF : CE MOIS-CI VS MOIS DERNIER
-    # ==========================================
+    # CA du jour
+    ca_jour = connexion.execute(
+        """
+        SELECT COALESCE(SUM(montant_total), 0)
+        FROM ventes
+        WHERE date(date_vente) = date('now', 'localtime')
+          AND utilisateur_id = ?
+        """,
+        (uid,)
+    ).fetchone()[0]
 
+    # Comparatif mois
     ca_mois = connexion.execute(
         """
         SELECT COALESCE(SUM(montant_total), 0)
@@ -110,18 +119,11 @@ def afficher_page_accueil():
     benefice_mois_dernier = ca_mois_dernier - dep_mois_dernier
 
     def variation_pct(valeur_actuelle, valeur_precedente):
-        """Renvoie la variation en % (float) ou None si non calculable."""
         if valeur_precedente == 0:
             return None
-        return (
-            (valeur_actuelle - valeur_precedente)
-            / abs(valeur_precedente) * 100
-        )
+        return (valeur_actuelle - valeur_precedente) / abs(valeur_precedente) * 100
 
-    # ==========================================
-    # VENTES SUR LES 30 DERNIERS JOURS
-    # ==========================================
-
+    # Ventes 30 jours
     ventes_par_jour = connexion.execute(
         """
         SELECT date(date_vente) AS jour, SUM(montant_total) AS total
@@ -134,18 +136,14 @@ def afficher_page_accueil():
         (uid,)
     ).fetchall()
 
-    # ==========================================
-    # TOP 5 DES PRODUITS LES PLUS VENDUS
-    # ==========================================
-
+    # Top 5 produits
     top_produits = connexion.execute(
         """
         SELECT
             produits.nom AS produit,
             SUM(ventes.quantite) AS quantite_vendue
         FROM ventes
-        LEFT JOIN produits
-            ON ventes.produit_id = produits.id
+        LEFT JOIN produits ON ventes.produit_id = produits.id
         WHERE ventes.utilisateur_id = ?
         GROUP BY produits.id, produits.nom
         ORDER BY quantite_vendue DESC
@@ -154,34 +152,27 @@ def afficher_page_accueil():
         (uid,)
     ).fetchall()
 
-    # ==========================================
-    # PRODUITS EN STOCK FAIBLE
-    # ==========================================
-
+    # Stock faible
     produits_faibles = connexion.execute(
         """
         SELECT nom, quantite, seuil_alerte
         FROM produits
         WHERE quantite <= seuil_alerte AND utilisateur_id = ?
         ORDER BY quantite ASC
-        LIMIT 3
+        LIMIT 5
         """,
         (uid,)
     ).fetchall()
 
-    # ==========================================
-    # VENTES RÉCENTES
-    # ==========================================
-
+    # Ventes récentes
     ventes_recentes = connexion.execute(
         """
         SELECT ventes.montant_total, ventes.date_vente, produits.nom
         FROM ventes
-        LEFT JOIN produits
-            ON ventes.produit_id = produits.id
+        LEFT JOIN produits ON ventes.produit_id = produits.id
         WHERE ventes.utilisateur_id = ?
         ORDER BY ventes.id DESC
-        LIMIT 3
+        LIMIT 5
         """,
         (uid,)
     ).fetchall()
@@ -190,8 +181,6 @@ def afficher_page_accueil():
 
     # ==========================================
     # STYLE
-    # (textwrap.dedent retire l'indentation Python avant l'envoi à
-    # Streamlit, sinon Markdown affiche le bloc comme du code brut)
     # ==========================================
 
     st.markdown(
@@ -200,89 +189,95 @@ def afficher_page_accueil():
             <style>
             .db-header {{
                 background: linear-gradient(135deg, {VERT} 0%, {VERT_FONCE} 100%);
-                border-radius: 14px;
-                padding: 14px 18px;
-                margin-bottom: 14px;
+                border-radius: 16px;
+                padding: 18px 20px;
+                margin-bottom: 18px;
+                box-shadow: 0 4px 14px rgba(0,0,0,0.08);
             }}
             .db-header .titre {{
                 color: {FOND_CARTE};
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: 700;
                 margin: 0;
+                text-align: center;
             }}
             .db-header .sous-titre {{
                 color: {BANNIERE_SOUS_TITRE};
-                font-size: 12px;
-                margin-top: 2px;
+                font-size: 13px;
+                margin-top: 4px;
+                opacity: 0.95;
+                text-align: center;
             }}
             .section-title {{
                 color: {TEXTE_PRINCIPAL};
                 font-size: 15px;
                 font-weight: 700;
-                margin: 16px 0 8px 0;
+                margin: 20px 0 10px 0;
             }}
             .kpi-card {{
                 background: {FOND_CARTE};
-                border-radius: 12px;
+                border-radius: 14px;
                 border: 1px solid {BORDURE};
-                box-shadow: 0 1px 6px {OMBRE_CARTE};
-                padding: 10px 12px;
-                min-height: 92px;
+                box-shadow: 0 2px 8px {OMBRE_CARTE};
+                padding: 14px 14px;
+                min-height: 100px;
+                transition: transform 0.15s ease;
             }}
             .kpi-icon {{
-                width: 26px;
-                height: 26px;
-                border-radius: 7px;
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
                 background: {VERT_FOND};
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 13px;
-                margin-bottom: 6px;
+                font-size: 14px;
+                margin-bottom: 8px;
             }}
             .kpi-label {{
                 color: {TEXTE_SECONDAIRE};
                 font-size: 11px;
                 font-weight: 500;
-                margin-bottom: 2px;
+                margin-bottom: 3px;
             }}
             .kpi-value {{
                 color: {TEXTE_PRINCIPAL};
-                font-size: 16px;
+                font-size: 17px;
                 font-weight: 700;
-                margin-bottom: 4px;
+                margin-bottom: 5px;
             }}
             .trend-badge {{
                 display: inline-block;
                 font-size: 10px;
                 font-weight: 600;
-                padding: 2px 7px;
+                padding: 2px 8px;
                 border-radius: 999px;
             }}
             .stat-mini {{
                 background: {FOND_CARTE};
-                border-radius: 10px;
+                border-radius: 12px;
                 border: 1px solid {BORDURE};
-                padding: 8px 10px;
+                padding: 12px 10px;
                 text-align: center;
+                box-shadow: 0 1px 4px {OMBRE_CARTE};
             }}
             .stat-mini .valeur {{
-                font-size: 16px;
+                font-size: 18px;
                 font-weight: 700;
                 color: {TEXTE_PRINCIPAL};
             }}
             .stat-mini .libelle {{
                 font-size: 11px;
                 color: {TEXTE_SECONDAIRE};
-                margin-top: 1px;
+                margin-top: 2px;
             }}
             .alert-card {{
                 background-color: {JAUNE_FOND};
-                padding: 8px 12px;
+                padding: 10px 14px;
                 border-radius: 10px;
                 border: 1px solid {JAUNE_BORDURE};
-                margin-bottom: 6px;
-                font-size: 12px;
+                margin-bottom: 8px;
+                font-size: 13px;
             }}
             .vente-row {{
                 display: flex;
@@ -291,29 +286,28 @@ def afficher_page_accueil():
                 background: {FOND_CARTE};
                 border: 1px solid {BORDURE};
                 border-radius: 10px;
-                padding: 8px 12px;
-                margin-bottom: 6px;
+                padding: 10px 14px;
+                margin-bottom: 7px;
             }}
-            .vente-row .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; font-size: 12px; }}
-            .vente-row .date {{ color: {TEXTE_MUET}; font-size: 10px; }}
-            .vente-row .montant {{ font-weight: 700; color: {VERT}; font-size: 12px; }}
-
-            /* Écrans étroits (téléphone) : Streamlit empile déjà les
-               colonnes tout seul, on réduit juste texte/espacements */
+            .vente-row .nom {{ font-weight: 600; color: {TEXTE_PRINCIPAL}; font-size: 13px; }}
+            .vente-row .date {{ color: {TEXTE_MUET}; font-size: 11px; }}
+            .vente-row .montant {{ font-weight: 700; color: {VERT}; font-size: 13px; }}
+            .action-btn {{
+                background: {FOND_CARTE};
+                border: 1px solid {BORDURE};
+                border-radius: 12px;
+                padding: 14px 10px;
+                text-align: center;
+                font-size: 13px;
+                font-weight: 600;
+                color: {TEXTE_PRINCIPAL};
+                box-shadow: 0 1px 4px {OMBRE_CARTE};
+            }}
             @media (max-width: 640px) {{
-                .db-header {{ padding: 10px 14px; border-radius: 12px; }}
-                .db-header .titre {{ font-size: 17px; }}
-                .db-header .sous-titre {{ font-size: 11px; }}
-                .section-title {{ font-size: 13px; margin: 12px 0 6px 0; }}
-                .kpi-card {{ padding: 8px 10px; min-height: auto; }}
-                .kpi-icon {{ width: 22px; height: 22px; font-size: 11px; }}
-                .kpi-label {{ font-size: 10px; }}
-                .kpi-value {{ font-size: 14px; }}
-                .trend-badge {{ font-size: 9px; padding: 1px 6px; }}
-                .stat-mini {{ padding: 6px 8px; }}
-                .stat-mini .valeur {{ font-size: 14px; }}
-                .stat-mini .libelle {{ font-size: 10px; }}
-                .alert-card, .vente-row {{ padding: 6px 10px; }}
+                .db-header {{ padding: 14px 16px; }}
+                .db-header .titre {{ font-size: 18px; }}
+                .kpi-card {{ min-height: auto; padding: 12px; }}
+                .kpi-value {{ font-size: 15px; }}
             }}
             </style>
             """
@@ -322,7 +316,7 @@ def afficher_page_accueil():
     )
 
     # ==========================================
-    # HELPERS D'AFFICHAGE (HTML sur une seule ligne)
+    # HELPERS
     # ==========================================
 
     def carte_kpi(icone, label, valeur, variation=None, inverse=False):
@@ -363,14 +357,14 @@ def afficher_page_accueil():
 
     st.markdown(
         '<div class="db-header">'
-        '<p class="titre">🇰🇲 Tableau de bord</p>'
+        '<p class="titre">Tableau de bord</p>'
         '<p class="sous-titre">Vue générale de votre activité commerciale</p>'
         '</div>',
         unsafe_allow_html=True
     )
 
     # ==========================================
-    # COMPARATIF DU MOIS
+    # KPI PRINCIPAUX
     # ==========================================
 
     col1, col2, col3, col4 = st.columns(4)
@@ -390,23 +384,52 @@ def afficher_page_accueil():
             variation_pct(benefice_mois, benefice_mois_dernier)
         )
     with col4:
-        carte_kpi("🏦", "Bénéfice total", f"{benefice:,.0f} KMF")
+        carte_kpi("☀️", "CA du jour", f"{ca_jour:,.0f} KMF")
 
     # ==========================================
-    # CHIFFRES CLÉS GLOBAUX
+    # CHIFFRES CLÉS
     # ==========================================
 
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         carte_mini(nombre_produits, "📦 Produits")
     with col2:
         carte_mini(nombre_clients, "👥 Clients")
     with col3:
         carte_mini(stocks_faibles, "⚠️ Stock faible")
+    with col4:
+        carte_mini(f"{benefice:,.0f}", "🏦 Bénéfice total")
 
     # ==========================================
-    # ÉVOLUTION DES VENTES (30 DERNIERS JOURS)
+    # ACTIONS RAPIDES
+    # ==========================================
+
+    st.markdown(
+        '<div class="section-title">⚡ Actions rapides</div>',
+        unsafe_allow_html=True
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        if st.button("🛒 Nouvelle vente", use_container_width=True):
+            st.session_state["menu_force"] = "Ventes"
+            st.rerun()
+    with c2:
+        if st.button("🧾 Nouvelle facture", use_container_width=True):
+            st.session_state["menu_force"] = "Facturation"
+            st.rerun()
+    with c3:
+        if st.button("📦 Ajouter produit", use_container_width=True):
+            st.session_state["menu_force"] = "Produits"
+            st.rerun()
+    with c4:
+        if st.button("👥 Ajouter client", use_container_width=True):
+            st.session_state["menu_force"] = "Clients"
+            st.rerun()
+
+    # ==========================================
+    # GRAPHIQUE 30 JOURS
     # ==========================================
 
     st.markdown(
@@ -422,7 +445,7 @@ def afficher_page_accueil():
         df_ventes = pd.DataFrame({"jour": jours, "ventes": valeurs})
 
         graphique = alt.Chart(df_ventes).mark_area(
-            line={"color": VERT, "size": 3},
+            line={"color": VERT, "size": 2.5},
             color=alt.Gradient(
                 gradient="linear",
                 stops=[
@@ -434,7 +457,7 @@ def afficher_page_accueil():
             opacity=0.18,
             interpolate="monotone"
         ).encode(
-            x=alt.X("jour:T", title=None, axis=alt.Axis(grid=False)),
+            x=alt.X("jour:T", title=None, axis=alt.Axis(grid=False, format="%d/%m")),
             y=alt.Y(
                 "ventes:Q", title=None,
                 axis=alt.Axis(grid=True, gridColor=GRILLE_GRAPHIQUE)
@@ -443,76 +466,74 @@ def afficher_page_accueil():
                 alt.Tooltip("jour:T", title="Date", format="%d/%m/%Y"),
                 alt.Tooltip("ventes:Q", title="Ventes", format=",.0f"),
             ]
-        ).properties(height=170)
+        ).properties(height=180)
 
         st.altair_chart(graphique, use_container_width=True)
     else:
         st.info("Aucune vente enregistrée sur les 30 derniers jours.")
 
     # ==========================================
-    # TOP 5 DES PRODUITS
+    # DEUX COLONNES : TOP PRODUITS + STOCK FAIBLE
     # ==========================================
 
-    st.markdown(
-        '<div class="section-title">🏆 Top 5 des produits</div>',
-        unsafe_allow_html=True
-    )
+    col_gauche, col_droite = st.columns(2)
 
-    if top_produits:
-        noms = [p["produit"] or "Produit supprimé" for p in top_produits]
-        quantites = [p["quantite_vendue"] or 0 for p in top_produits]
+    with col_gauche:
+        st.markdown(
+            '<div class="section-title">🏆 Top 5 des produits</div>',
+            unsafe_allow_html=True
+        )
 
-        df_top = pd.DataFrame({"produit": noms, "quantite": quantites})
+        if top_produits:
+            noms = [p["produit"] or "Produit supprimé" for p in top_produits]
+            quantites = [p["quantite_vendue"] or 0 for p in top_produits]
+            df_top = pd.DataFrame({"produit": noms, "quantite": quantites})
 
-        barres = alt.Chart(df_top).mark_bar(
-            cornerRadiusTopRight=6, cornerRadiusBottomRight=6
-        ).encode(
-            x=alt.X("quantite:Q", title=None, axis=None),
-            y=alt.Y("produit:N", sort="-x", title=None),
-            color=alt.Color(
-                "quantite:Q",
-                scale=alt.Scale(range=[VERT_CLAIR, VERT]),
-                legend=None
-            ),
-            tooltip=[
-                alt.Tooltip("produit:N", title="Produit"),
-                alt.Tooltip("quantite:Q", title="Quantité vendue"),
-            ]
-        ).properties(height=160)
+            barres = alt.Chart(df_top).mark_bar(
+                cornerRadiusTopRight=6, cornerRadiusBottomRight=6
+            ).encode(
+                x=alt.X("quantite:Q", title=None, axis=None),
+                y=alt.Y("produit:N", sort="-x", title=None),
+                color=alt.Color(
+                    "quantite:Q",
+                    scale=alt.Scale(range=[VERT_CLAIR, VERT]),
+                    legend=None
+                ),
+                tooltip=[
+                    alt.Tooltip("produit:N", title="Produit"),
+                    alt.Tooltip("quantite:Q", title="Quantité vendue"),
+                ]
+            ).properties(height=180)
 
-        st.altair_chart(barres, use_container_width=True)
-    else:
-        st.info("Aucune vente enregistrée pour le moment.")
+            st.altair_chart(barres, use_container_width=True)
+        else:
+            st.info("Aucune vente enregistrée.")
 
-    # ==========================================
-    # STOCK FAIBLE
-    # ==========================================
+    with col_droite:
+        st.markdown(
+            '<div class="section-title">⚠️ Stock faible</div>',
+            unsafe_allow_html=True
+        )
 
-    st.markdown(
-        '<div class="section-title">⚠️ Produits avec stock faible</div>',
-        unsafe_allow_html=True
-    )
-
-    if produits_faibles:
-        for produit in produits_faibles:
-            st.markdown(
-                f'<div class="alert-card">'
-                f'<strong>📦 {produit["nom"]}</strong><br>'
-                f'Stock actuel : {produit["quantite"]}'
-                f' &nbsp;|&nbsp; '
-                f'Seuil d\'alerte : {produit["seuil_alerte"]}'
-                f'</div>',
-                unsafe_allow_html=True
-            )
-    else:
-        st.success("✅ Aucun produit n'est actuellement en stock faible.")
+        if produits_faibles:
+            for produit in produits_faibles:
+                st.markdown(
+                    f'<div class="alert-card">'
+                    f'<strong>📦 {produit["nom"]}</strong><br>'
+                    f'Stock : <b>{produit["quantite"]}</b> '
+                    f'&nbsp;•&nbsp; Seuil : {produit["seuil_alerte"]}'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+        else:
+            st.success("✅ Aucun produit en stock faible.")
 
     # ==========================================
     # VENTES RÉCENTES
     # ==========================================
 
     st.markdown(
-        '<div class="section-title">💰 Ventes récentes</div>',
+        '<div class="section-title">💰 Dernières ventes</div>',
         unsafe_allow_html=True
     )
 
@@ -529,4 +550,3 @@ def afficher_page_accueil():
             )
     else:
         st.info("Aucune vente enregistrée pour le moment.")
-

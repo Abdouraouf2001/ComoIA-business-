@@ -133,25 +133,26 @@ def analyser_question(question, utilisateur_id):
         ):
             periode = "mois"
 
-        condition_ventes = "WHERE utilisateur_id = ?"
-        condition_depenses = "WHERE utilisateur_id = ?"
+        # IMPORTANT : on précise toujours la table pour éviter l'ambiguïté
+        condition_ventes = "WHERE ventes.utilisateur_id = ?"
+        condition_depenses = "WHERE depenses.utilisateur_id = ?"
+
         if periode == "aujourd'hui":
-            condition_ventes += " AND date(date_vente) = date('now', 'localtime')"
-            condition_depenses += " AND date(date_depense) = date('now', 'localtime')"
+            condition_ventes += " AND date(ventes.date_vente) = date('now', 'localtime')"
+            condition_depenses += " AND date(depenses.date_depense) = date('now', 'localtime')"
         elif periode == "semaine":
             condition_ventes += (
-                " AND date(date_vente) >= date('now', 'localtime', '-6 days')"
+                " AND date(ventes.date_vente) >= date('now', 'localtime', '-6 days')"
             )
             condition_depenses += (
-                " AND date(date_depense) >= date('now', 'localtime', '-6 days')"
+                " AND date(depenses.date_depense) >= date('now', 'localtime', '-6 days')"
             )
         elif periode == "mois":
             condition_ventes += (
-                " AND date(date_vente) >= date('now', 'localtime', 'start of month')"
+                " AND date(ventes.date_vente) >= date('now', 'localtime', 'start of month')"
             )
             condition_depenses += (
-                " AND date(date_depense) >= "
-                "date('now', 'localtime', 'start of month')"
+                " AND date(depenses.date_depense) >= date('now', 'localtime', 'start of month')"
             )
 
         def texte_periode():
@@ -182,9 +183,6 @@ def analyser_question(question, utilisateur_id):
 
             # ==========================================
             # PRODUITS LES PLUS VENDUS
-            # (vérifié AVANT le bloc générique "ventes" ci-dessous, car
-            # "vendus"/"vendu" y matcherait sinon en premier et court-
-            # circuiterait cette réponse plus précise)
             # ==========================================
             if (
                 "plus vendu" in question or "plus vendus" in question
@@ -203,8 +201,10 @@ def analyser_question(question, utilisateur_id):
                     """,
                     (utilisateur_id,)
                 ).fetchall()
+
                 if not produits:
                     return "ℹ️ Aucune vente enregistrée pour cette période."
+
                 liste = "\n".join(
                     f"- 🛒 {p['nom']} : **{p['quantite']} unité(s)** vendue(s)"
                     for p in produits
@@ -353,4 +353,3 @@ def analyser_question(question, utilisateur_id):
 
         except Exception as erreur:
             return f"❌ Une erreur est survenue lors de l'analyse : {erreur}"
-

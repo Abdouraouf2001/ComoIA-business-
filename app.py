@@ -1,7 +1,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+
 from config.colors import BORDURE, FOND_CARTE, FOND_PAGE, TEXTE_SECONDAIRE, VERT
 from database.models import creer_tables
+
 from interface.connexion import afficher_page_connexion
 from interface.inscription import afficher_page_inscription
 from interface.recuperation import afficher_page_recuperation
@@ -13,9 +15,11 @@ from interface.depenses import afficher_page_depenses
 from interface.clients import afficher_page_clients
 from interface.facturation import afficher_page_facturation
 from interface.rapports import afficher_page_rapports
+from interface.parametres import afficher_page_parametres
 from interface.assistant_ia import afficher_page_assistant_ia
 from interface.previsions import afficher_page_previsions
 from interface.administrateur import afficher_page_administrateur
+
 
 # ==========================================
 # CONFIGURATION
@@ -27,10 +31,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+
 # ==========================================
 # INITIALISATION BASE DE DONNÉES
 # ==========================================
 creer_tables()
+
 
 # ==========================================
 # SESSION
@@ -48,6 +54,7 @@ if "role" not in st.session_state:
 if "page_auth" not in st.session_state:
     st.session_state.page_auth = "connexion"
 
+
 # ==========================================
 # UTILISATEUR NON CONNECTÉ
 # ==========================================
@@ -60,37 +67,41 @@ if not st.session_state.connecte:
         afficher_page_recuperation()
     st.stop()
 
+
 # ==========================================
 # STYLE APPLICATION
 # ==========================================
 st.markdown(
     f"""
-<style>
-.stApp {{
-    background-color: {FOND_PAGE};
-}}
-.footer {{
-    text-align: center;
-    margin-top: 50px;
-    padding: 20px;
-    color: {TEXTE_SECONDAIRE};
-    border-top: 1px solid {BORDURE};
-}}
-</style>
-""",
+    <style>
+    .stApp {{
+        background-color: {FOND_PAGE};
+    }}
+    .footer {{
+        text-align: center;
+        margin-top: 50px;
+        padding: 20px;
+        color: {TEXTE_SECONDAIRE};
+        border-top: 1px solid {BORDURE};
+    }}
+    </style>
+    """,
     unsafe_allow_html=True
 )
+
 
 # ==========================================
 # BARRE DU HAUT : infos utilisateur + déconnexion
 # ==========================================
 col_info, col_bouton = st.columns([5, 1])
+
 with col_info:
     st.caption(
         f"👤 **{st.session_state.nom_utilisateur}** • "
         f"{st.session_state.email_utilisateur} • "
         f"Rôle : {st.session_state.role}"
     )
+
 with col_bouton:
     if st.button("🚪 Déconnexion", use_container_width=True):
         st.session_state.connecte = False
@@ -101,8 +112,9 @@ with col_bouton:
         st.session_state.page_auth = "connexion"
         st.rerun()
 
+
 # ==========================================
-# MENU HORIZONTAL (Administration visible aux admins uniquement)
+# MENU HORIZONTAL
 # ==========================================
 options_menu = [
     "Accueil",
@@ -113,9 +125,11 @@ options_menu = [
     "Dépenses",
     "Clients",
     "Rapports",
+    "Mon entreprise",
     "Assistant IA",
     "Prévisions IA",
 ]
+
 icones_menu = [
     "house",
     "box-seam",
@@ -125,6 +139,7 @@ icones_menu = [
     "credit-card",
     "people",
     "graph-up",
+    "shop",
     "robot",
     "graph-up-arrow",
 ]
@@ -133,12 +148,19 @@ if st.session_state.role == "administrateur":
     options_menu.append("Administration")
     icones_menu.append("shield-lock")
 
+# Gestion de la redirection forcée depuis l'Accueil (Actions rapides)
+default_index = 0
+if "menu_force" in st.session_state:
+    page_forcee = st.session_state.pop("menu_force")
+    if page_forcee in options_menu:
+        default_index = options_menu.index(page_forcee)
+
 menu = option_menu(
     menu_title=None,
     options=options_menu,
     icons=icones_menu,
     menu_icon="cast",
-    default_index=0,
+    default_index=default_index,
     orientation="horizontal",
     styles={
         "container": {"padding": "0!important", "background-color": FOND_CARTE},
@@ -152,6 +174,7 @@ menu = option_menu(
         "nav-link-selected": {"background-color": VERT},
     },
 )
+
 
 # ==========================================
 # ROUTAGE DES PAGES
@@ -172,6 +195,8 @@ elif menu == "Clients":
     afficher_page_clients()
 elif menu == "Rapports":
     afficher_page_rapports()
+elif menu == "Mon entreprise":
+    afficher_page_parametres()
 elif menu == "Assistant IA":
     afficher_page_assistant_ia()
 elif menu == "Prévisions IA":
@@ -179,8 +204,9 @@ elif menu == "Prévisions IA":
 elif menu == "Administration":
     afficher_page_administrateur()
 
+
 # ==========================================
-# FOOTER (affiché sur toutes les pages, hors connexion)
+# FOOTER
 # ==========================================
 st.markdown(
     '<div class="footer">'

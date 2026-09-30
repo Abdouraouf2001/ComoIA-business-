@@ -1,3 +1,4 @@
+
 from contextlib import closing
 
 import streamlit as st
@@ -93,7 +94,10 @@ def afficher_page_clients():
                     )
                     connexion.commit()
 
-                st.session_state["message_client"] = "✅ Client ajouté avec succès !"
+                # st.toast survit au st.rerun() immédiat qui suit, contrairement
+                # à st.success() — utile puisqu'on change de page dans la foulée.
+                st.toast("✅ Client ajouté avec succès !", icon="✅")
+                st.session_state["page_demandee"] = "Facturation"
                 st.rerun()
 
     # ==========================================================
@@ -247,3 +251,4 @@ def afficher_page_clients():
         else:
             # Le client a été supprimé entre-temps
             del st.session_state.client_a_modifier
+

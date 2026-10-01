@@ -55,7 +55,7 @@ def afficher_page_assistant_ia():
     )
 
     st.info(
-        "💡 Cette première version fonctionne sans API. "
+        "💡 Il suffit de posé la question pas besoin de réfléchir. "
         "Elle analyse directement les données de votre entreprise."
     )
 

@@ -1,27 +1,44 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from config.colors import BORDURE, FOND_CARTE, FOND_PAGE, TEXTE_SECONDAIRE, VERT
+
+from config.colors import (
+    BORDURE,
+    FOND_CARTE,
+    FOND_PAGE,
+    TEXTE_SECONDAIRE,
+    VERT
+)
+
 from database.models import creer_tables
+
 from interface.connexion import afficher_page_connexion
 from interface.inscription import afficher_page_inscription
 from interface.recuperation import afficher_page_recuperation
 from interface.accueil import afficher_page_accueil
 from interface.produits import afficher_page_produits
 from interface.stock import afficher_page_stock
+
+# Nouveau système de vente
 from interface.ventes import afficher_page_ventes
+
+# Facturation conservée dans le menu pour consultation
+from interface.facturation import afficher_page_facturation
+
 from interface.depenses import afficher_page_depenses
 from interface.clients import afficher_page_clients
-from interface.facturation import afficher_page_facturation
 from interface.rapports import afficher_page_rapports
 from interface.parametres import afficher_page_parametres
 from interface.assistant_ia import afficher_page_assistant_ia
 from interface.previsions import afficher_page_previsions
 from interface.administrateur import afficher_page_administrateur
+from interface.vision import afficher_page_vision
 from interface.pwa import injecter_pwa
+
 
 # ==========================================
 # CONFIGURATION
 # ==========================================
+
 st.set_page_config(
     page_title="ComorIA Business",
     page_icon="🇰🇲",
@@ -29,53 +46,74 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+
 # ==========================================
 # INITIALISATION BASE DE DONNÉES
 # ==========================================
+
 creer_tables()
 
+
 # ==========================================
-# PWA : rend l'app installable (icône sur écran d'accueil / bureau)
+# PWA
 # ==========================================
+
 injecter_pwa()
+
 
 # ==========================================
 # SESSION
 # ==========================================
+
 if "connecte" not in st.session_state:
     st.session_state.connecte = False
+
 if "utilisateur_id" not in st.session_state:
     st.session_state.utilisateur_id = None
+
 if "nom_utilisateur" not in st.session_state:
     st.session_state.nom_utilisateur = None
+
 if "email_utilisateur" not in st.session_state:
     st.session_state.email_utilisateur = None
+
 if "role" not in st.session_state:
     st.session_state.role = None
+
 if "page_auth" not in st.session_state:
     st.session_state.page_auth = "connexion"
+
 
 # ==========================================
 # UTILISATEUR NON CONNECTÉ
 # ==========================================
+
 if not st.session_state.connecte:
+
     if st.session_state.page_auth == "connexion":
         afficher_page_connexion()
+
     elif st.session_state.page_auth == "inscription":
         afficher_page_inscription()
+
     elif st.session_state.page_auth == "recuperation":
         afficher_page_recuperation()
+
     st.stop()
+
 
 # ==========================================
 # STYLE APPLICATION
 # ==========================================
+
 st.markdown(
     f"""
 <style>
+
 .stApp {{
     background-color: {FOND_PAGE};
 }}
+
 .footer {{
     text-align: center;
     margin-top: 50px;
@@ -83,34 +121,56 @@ st.markdown(
     color: {TEXTE_SECONDAIRE};
     border-top: 1px solid {BORDURE};
 }}
+
 </style>
 """,
     unsafe_allow_html=True
 )
 
+
 # ==========================================
-# BARRE DU HAUT : infos utilisateur + déconnexion
+# BARRE DU HAUT
 # ==========================================
+
 col_info, col_bouton = st.columns([5, 1])
+
 with col_info:
+
     st.caption(
         f"👤 **{st.session_state.nom_utilisateur}** • "
         f"{st.session_state.email_utilisateur} • "
         f"Rôle : {st.session_state.role}"
     )
+
+
 with col_bouton:
-    if st.button("🚪 Déconnexion", use_container_width=True):
+
+    if st.button(
+        "🚪 Déconnexion",
+        use_container_width=True
+    ):
+
         st.session_state.connecte = False
         st.session_state.utilisateur_id = None
         st.session_state.nom_utilisateur = None
         st.session_state.email_utilisateur = None
         st.session_state.role = None
         st.session_state.page_auth = "connexion"
+
+        # Nettoyage du système de vente
+        st.session_state.pop("panier_vente", None)
+        st.session_state.pop("derniere_facture_id", None)
+        st.session_state.pop("derniere_facture_numero", None)
+        st.session_state.pop("client_vente_selectionne", None)
+        st.session_state.pop("afficher_formulaire_client_vente", None)
+
         st.rerun()
 
+
 # ==========================================
-# MENU HORIZONTAL (Administration visible aux admins uniquement)
+# MENU HORIZONTAL
 # ==========================================
+
 options_menu = [
     "Accueil",
     "Produits",
@@ -123,7 +183,10 @@ options_menu = [
     "Mon entreprise",
     "Assistant IA",
     "Prévisions IA",
+    "Vision IA"
 ]
+
+
 icones_menu = [
     "house",
     "box-seam",
@@ -136,18 +199,39 @@ icones_menu = [
     "shop",
     "robot",
     "graph-up-arrow",
+    "eye"
 ]
 
+
+# ==========================================
+# ADMINISTRATION
+# ==========================================
+
 if st.session_state.role == "administrateur":
+
     options_menu.append("Administration")
     icones_menu.append("shield-lock")
 
-# Redirection forcée depuis une autre page (ex. après une vente -> Clients).
-# manual_select impose la sélection pour ce rendu, une seule fois.
-page_demandee = st.session_state.pop("page_demandee", None)
-selection_forcee = (
-    options_menu.index(page_demandee) if page_demandee in options_menu else None
+
+# ==========================================
+# REDIRECTION
+# ==========================================
+
+page_demandee = st.session_state.pop(
+    "page_demandee",
+    None
 )
+
+selection_forcee = (
+    options_menu.index(page_demandee)
+    if page_demandee in options_menu
+    else None
+)
+
+
+# ==========================================
+# MENU
+# ==========================================
 
 menu = option_menu(
     menu_title=None,
@@ -157,56 +241,137 @@ menu = option_menu(
     default_index=0,
     manual_select=selection_forcee,
     orientation="horizontal",
+
     styles={
-        "container": {"padding": "0!important", "background-color": FOND_CARTE},
-        "icon": {"font-size": "16px"},
+        "container": {
+            "padding": "0!important",
+            "background-color": FOND_CARTE
+        },
+
+        "icon": {
+            "font-size": "16px"
+        },
+
         "nav-link": {
             "font-size": "13px",
             "text-align": "center",
             "margin": "0px",
-            "padding": "10px 8px",
+            "padding": "10px 8px"
         },
-        "nav-link-selected": {"background-color": VERT},
+
+        "nav-link-selected": {
+            "background-color": VERT
+        }
     },
-    key="menu_principal",
+
+    key="menu_principal"
 )
+
 
 # ==========================================
 # ROUTAGE DES PAGES
 # ==========================================
+
 if menu == "Accueil":
+
     afficher_page_accueil()
+
+
 elif menu == "Produits":
+
     afficher_page_produits()
+
+
 elif menu == "Stock":
+
     afficher_page_stock()
+
+
 elif menu == "Ventes":
+
+    # ======================================================
+    # NOUVEAU SYSTÈME DE VENTE
+    #
+    # Vente
+    #    ↓
+    # Client
+    #    ↓
+    # Produits
+    #    ↓
+    # Panier
+    #    ↓
+    # Validation
+    #    ↓
+    # Facture
+    #    ↓
+    # Impression / PDF
+    # ======================================================
+
     afficher_page_ventes()
+
+
 elif menu == "Facturation":
+
+    # Page conservée pour consulter les factures
     afficher_page_facturation()
+
+
 elif menu == "Dépenses":
+
     afficher_page_depenses()
+
+
 elif menu == "Clients":
+
+    # Gestion complète des clients
+    # La création rapide pendant une vente
+    # se fait directement depuis Ventes.
+
     afficher_page_clients()
+
+
 elif menu == "Rapports":
+
     afficher_page_rapports()
+
+
 elif menu == "Mon entreprise":
+
     afficher_page_parametres()
+
+
 elif menu == "Assistant IA":
+
     afficher_page_assistant_ia()
+
+
 elif menu == "Prévisions IA":
+
     afficher_page_previsions()
+
+
+elif menu == "Vision IA":
+
+    afficher_page_vision()
+
+
 elif menu == "Administration":
+
     afficher_page_administrateur()
 
+
 # ==========================================
-# FOOTER (affiché sur toutes les pages, hors connexion)
+# FOOTER
 # ==========================================
+
 st.markdown(
     '<div class="footer">'
     '<strong>ComorIA Business AI</strong><br>'
-    "L'intelligence artificielle au service des entreprises comoriennes<br><br>"
+    "L'intelligence artificielle au service des entreprises comoriennes"
+    "<br><br>"
     '© 2026 ComorIA • Tous droits réservés'
     '</div>',
     unsafe_allow_html=True
 )
+
+                    

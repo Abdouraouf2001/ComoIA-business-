@@ -366,12 +366,16 @@ elif menu == "Administration":
 
 st.markdown(
     '<div class="footer">'
-    '<strong>ComorIA Business AI</strong><br>'
+    '<strong>🇰🇲 ComorIA AI & Technologies</strong><br>'
+    '<span style="font-size: 14px;">'
+    'Éditeur de ComorIA Business AI'
+    '</span><br>'
     "L'intelligence artificielle au service des entreprises comoriennes"
     "<br><br>"
-    '© 2026 ComorIA • Tous droits réservés'
+    '© 2026 ComorIA AI & Technologies • Tous droits réservés'
     '</div>',
     unsafe_allow_html=True
 )
+
 
                     

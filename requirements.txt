@@ -5,3 +5,5 @@ pandas
 fpdf2
 openpyxl
 requests
+pytesseract
+Pillow
